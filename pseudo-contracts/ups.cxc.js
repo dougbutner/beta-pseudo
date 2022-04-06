@@ -4,7 +4,7 @@
 
 ups.cxc { 
   LISTEN => transfer (SOL, BLUX)
-  ACTION payup() // Pays SOLX / BLUX when appropriate  
+  ACTION payup(account) // Send payments listed in |ious|  
   ACTION updateartist(account, googleid) // Register artist, or change artist information
   ACTION updateartistgroup({members},{permissions}) // Register artist group, or change artist information
   ACTION updatesong(songID, {info}) // Who gets paid for each cXc post, by songid (internal cXc.world id)
@@ -15,7 +15,6 @@ ups.cxc {
   internal ACTION - updatetotal(songid) // keep single-row record of ups for each song
   internal ACTION - updateiou(sending_account, receiving_account) // Makes sure people get paid
   internal ACTION - removeiou([caller]) // All IOUS are removed from table, for performance
-  internal ACTION - payup(account) // Send payments listed in |ious| 
   
   
 // --- Tables --- \\
