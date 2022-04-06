@@ -1,22 +1,21 @@
 // === Ups Contract === \\
-// Takes all Ups, Pays artists, Maintains song and artist association 
+// Takes all Ups, Pays artists, Maintains song and artist association + Band member lists
+
+
 ups.cxc { 
   LISTEN => transfer (SOL, BLUX)
   ACTION payup() // Pays SOLX / BLUX when appropriate  
   ACTION updateartist(account, googleid) // Register artist, or change artist information
   ACTION updateartistgroup({members},{permissions}) // Register artist group, or change artist information
-  ACTION updatesong() // Who gets paid for each cXc post, by songid (internal cXc.world id)
-  
-  
+  ACTION updatesong(songID, {info}) // Who gets paid for each cXc post, by songid (internal cXc.world id)
 
   internal ACTION - updateup(ups_count, ups_type, [caller]) // Checks + calls logup() updateiou() and updatetotal()
-  internal ACTION - logup(ups_count, ups_type, method, [caller]) // UP in |ups|
+  internal ACTION - logup(ups_count, ups_type, method, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
   internal ACTION - removeup(account [caller]) // Will remove blacklisted user's ups retroactively
-  internal ACTION - updatetotal(account, songid) // keep single-row record of ups for each song
-  internal ACTION - updateiou() // Makes sure people get paid
-  internal ACTION - removeiou() // All IOUS are removed from table, for performance
+  internal ACTION - updatetotal(songid) // keep single-row record of ups for each song
+  internal ACTION - updateiou(sending_account, receiving_account) // Makes sure people get paid
+  internal ACTION - removeiou([caller]) // All IOUS are removed from table, for performance
   internal ACTION - payup(account) // Send payments listed in |ious| 
-  
   
   
 // --- Tables --- \\
@@ -39,8 +38,8 @@ ups.cxc {
   
   TABLE ious [
     sending_account // Sent Ups
-    recieving_account // Owed tokens 
-    recieving_account_type // group or artist OR not needed if we check if account is valid + reg
+    receiving_account // Owed tokens 
+    receiving_account_type // group or artist OR not needed if we check if account is valid + reg
     ups_type // SOL or BLUX
     ups_count 
     initiated // When the IOU was registeredtimestamp (internal, no need for TU)
