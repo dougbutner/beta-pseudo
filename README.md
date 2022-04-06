@@ -50,10 +50,15 @@ We have had to make some changes for performance. Here's how it will work now.
 - Levels now exist on Soldisks
 - SOL will now be a regular eosio.token contract, so users can vote without the app. 
 - This means users can trade SOL (unplanned) so we've added a requirement that 20% of SOL received must be used for Sol Ups or the user won't be able to claim more SOL 
+<<<<<<< HEAD
 - There is no 12-hour wait to claim, users can claim up to every Time Unit (5 minutes), and up to the maximum allowed by their level
 - Low-level Solar Disks are allowed to claim 1 SOL per time unit passed (not based on  max charge). Next-claim reward amount will not increase after daily limit is reached. 
 - Listeners will be be paid BLUX
 - BLUX will be included in default top charts, and Blu Ups considered in reward algorithm, with limits
+=======
+- Listeners will be be paid BLUX
+- BLUX will be included in default top charts, and Blu Ups considered in reward algorithm
+>>>>>>> 81b05825ef39fee76f92844d9413a36f74465f8c
 - Users will be able to trade Soldisk NFTs, but only register one at a time themselves
 
 # [Learn more about cXc](https://linktr.ee/cxc.world)
