@@ -5,8 +5,8 @@ Architecture for contracts related to cXc.world 🗺🎶 beta.
 Simply open an issue with your ideas, or send pull requests. If you don't have a Github account, let us know what you see to be improved in the [Ideas + Feedback section](https://discord.gg/7MWFcYFjHz) of cXc's discord. 
 
 **Find the contracts** 
-- [ups.cxc](pseudo-contracts/ups.cxc) - Receives BLUX / Sol Ups / Big Ups and pays artists BLUX
-- [soldisk.cxc](pseudo-contracts/soldisk.cxc) - Manages Solar Disk registration and records. 
+- [ups.cxc](pseudo-contracts/ups.cxc.js) - Receives BLUX / Sol Ups / Big Ups and pays artists BLUX
+- [soldisk.cxc](pseudo-contracts/soldisk.cxc.js) - Manages Solar Disk registration and recharges
 
 
 ## To contribute to smart contract development
@@ -27,6 +27,7 @@ TABLE [
 
 |table_name|
 |table_name => column_name|
+
 ```
 wordstogether and words_together both used (sorry not sorry)
 
@@ -39,6 +40,21 @@ TU = Internal Time Unit calculated from timestamp (All contracts)
 AUTH_ACCOUNT = "currentxchng", "cxc", "[soldisk, ups,].cxc"
 
 ```
+
+## Differences from Purple Explainer
+We have had to make some changes for performance. Here's how it will work now.
+
+> For more info, read the [Soldisk Documentation](https://github.com/currentxchange/purple-explainer/blob/master/Soldisk.md)
+
+- Users must have a Soldisk (renamed from Solar Disk) with at least 1 PURPLE attached. 
+- Levels now exist on Soldisks
+- SOL will now be a regular eosio.token contract, so users can vote without the app. 
+- This means users can trade SOL (unplanned) so we've added a requirement that 20% of SOL received must be used for Sol Ups or the user won't be able to claim more SOL 
+- There is no 12-hour wait to claim, users can claim up to every Time Unit (5 minutes), and up to the maximum allowed by their level
+- Low-level Solar Disks are allowed to claim 1 SOL per time unit passed (not based on  max charge). Next-claim reward amount will not increase after daily limit is reached. 
+- Listeners will be be paid BLUX
+- BLUX will be included in default top charts, and Blu Ups considered in reward algorithm, with limits
+- Users will be able to trade Soldisk NFTs, but only register one at a time themselves
 
 # [Learn more about cXc](https://linktr.ee/cxc.world)
 
