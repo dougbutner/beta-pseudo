@@ -6,17 +6,17 @@ soldisk.cxc {
   LISTEN => simpleassets:transfer (Soldisk)
   LISTEN => ups.cxc:updatetotal()
 
-  ACTION chargedisk(diskid, [sender]) // Sends user SOL tokens based on time passed
-  ACTION registerdisk(diskid, [sender]) // Associate max 1 Soldisk per account
-  ACTION unregisterdisk() // Remove account / Soldisk association
-  ACTION update_blacklist() // Add or remove accounts from blacklist, prevents charging Soldisk NFTs
+  ACTION chargedisk(simpleassetsID, [sender]) // Sends user SOL tokens based on time passed
+  ACTION registerdisk(simpleassetsID, [sender]) // Associate max 1 Soldisk per account
+  ACTION unregisterdisk(simpleassetsID, [caller]) // Remove account / Soldisk association
+  ACTION update_blacklist(account, remove_true) // Add or remove accounts from blacklist, prevents charging Soldisk NFTs
 
   
   TABLE diskreg [
     account 
     disk_id - Simple Assets ID // Set to 0 when user calls unregisterdisk() to prevent cheating the 20% rule 
     level
-    initiated - TU
+    initiated - TU // Time unit the disk was registered
   ]
   
   TABLE rechargelog [
@@ -27,15 +27,16 @@ soldisk.cxc {
   
   TABLE blacklist [
     account 
-    banner - Who banned this account
+    banner // What account banned this account
+    reason // Optional text field explaining reason for ban
   ]
   
   TABLE ledger [
     account 
     solx_earned 
     solx_spent 
-    updated
-    spent_tx_count
+    updated - timestamp
+    spent_tx_count // used to spot patterns indicative of bots
   ]
 
 }//END soldisk.cxc 
@@ -54,7 +55,6 @@ ACTION chargedisk (user)
 ACTION registerdisk(simpleassetsID, [caller])
 // Activates a Solar Disk's functions by registering in the directory
 - CHECK the diskid is a valid ID and of category solardisk
-
 - if exists |diskreg => account| and diskid != diskid
   - UPDATE |diskreg => diskid| // Calling unregister_disk() is not needed
 - if exists |diskreg => account| and diskid == diskid and level != level
@@ -65,7 +65,7 @@ ACTION registerdisk(simpleassetsID, [caller])
 - INSERT record |diskreg| 
 
 LISTEN => simpleassets:transfer (Soldisk)
-- call unregister_disk(diskID, [sender])
+- call unregister_disk(simpleassetsID, [sender])
 
 ACTION unregister_disk(simpleassetsID, [caller]) // Separate action easier for user
 - CHECK (caller = |diskreg => account| OR caller = AUTH_ACCOUNT)
@@ -77,7 +77,7 @@ LISTEN => ups.cxc:updatetotal()
   - else 
   - INSERT record into |ledger|  
   
-ACTION update_blacklist(account, remove)
+ACTION update_blacklist(account, remove_true)
   - CHECK sender = AUTH_ACCOUNTs
   - if (remove = 1) DELETE record from |blacklist|
   - else
