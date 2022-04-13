@@ -35,6 +35,17 @@ ups.cxc {
     updated
   ]
   
+  TABLE listeners [
+    account
+    first_vote
+    last_vote
+    total_sol_up
+    total_blux_up
+    total_big_ups
+    
+    PK - account
+  ]
+  
   TABLE ious [
     sending_account // Sent Ups
     receiving_account // Owed tokens 
