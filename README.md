@@ -40,7 +40,7 @@ wordstogether and words_together both used (sorry not sorry)
 
 ```js
 
-TU = Internal Time Unit calculated from timestamp (All contracts)
+TU = Internal Time Unit calculated from timestamp (All contracts) called timeunit in final code
 AUTH_ACCOUNT = "currentxchng", "cxc", "[soldisk, ups,].cxc"
 
 up_type { // ENUM uint8_t 
@@ -50,6 +50,9 @@ up_type { // ENUM uint8_t
 };
 
 ```
+
+> Please note - Function names and variable names change from psuedo-code to real code to account for character limits and conventions.
+
 
 ## Differences from Purple Explainer
 We have had to make some changes for performance. Here's how it will work now.
