@@ -15,7 +15,11 @@ ups.cxc {
   internal ACTION - updatetotal(songid) // keep single-row record of ups for each song
   internal ACTION - updateiou(sending_account, receiving_account) // Makes sure people get paid
   internal ACTION - removeiou([caller]) // All IOUS are removed from table, for performance
+  internal ACTION - updatelistener(account) // Keep track of total account amounts for ALL users
+  internal ACTION - removelistener(account) // Remove record of user in event of blacklisting
   
+  artists = string[]
+  weights = string[]
   
 // --- Tables --- \\
   TABLE ups [ // Records each and every up (All types)
@@ -39,8 +43,8 @@ ups.cxc {
     account
     first_vote
     last_vote
-    total_sol_up
-    total_blux_up
+    total_sol_ups
+    total_blux_ups
     total_big_ups
     
     PK - account
@@ -49,9 +53,9 @@ ups.cxc {
   TABLE ious [
     sending_account // Sent Ups
     receiving_account // Owed tokens 
-    receiving_account_type // group or artist OR not needed if we check if account is valid + reg
-    ups_type // SOL or BLUX
+    receiving_account_type // group or artist OR not needed if we check if account is valid + registered
     ups_count 
+    ups_type // SOL or BLUX
     initiated // When the IOU was registeredtimestamp (internal, no need for TU)
   ]
   
@@ -67,12 +71,13 @@ ups.cxc {
   TABLE artists [
     account
     googleid
-    name
+    artist_name
     artist_info {}
   ]
 
   TABLE artistgroups [
     groupname
+    internal_name // EOSIO "name"_n for compatibility and an index 
     artists {}
     weights {} // Weights are from 1-12 and determine how much each person gets every time around the wheel
     artist_info {}
@@ -81,7 +86,7 @@ ups.cxc {
   
   TABLE internal_records [
     last_pay
-    remaining payment 
+    remaining // BOOL to show whether we reached the end of the list in the last payment 
   ]
 }
 
