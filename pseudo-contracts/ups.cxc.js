@@ -6,15 +6,15 @@ ups.cxc {
   LISTEN => transfer (SOL, BLUX)
   ACTION payup(account) // Send payments listed in |ious|  
   ACTION updateartist(account, googleid) // Register artist, or change artist information
-  ACTION updateartistgroup({members},{permissions}) // Register artist group, or change artist information
+  ACTION updateartistgroup(internal_name, artist_info, {members}, {weights}) // Register artist group, or change artist information
   ACTION updatesong(songID, {info}) // Who gets paid for each cXc post, by songid (internal cXc.world id)
 
   internal ACTION - updateup(ups_count, ups_type, [caller]) // Checks + calls logup() updateiou() and updatetotal()
-  internal ACTION - logup(ups_count, ups_type, method, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
-  internal ACTION - removeup(account [caller]) // Will remove blacklisted user's ups retroactively
+  internal ACTION - logup(ups_count, ups_type, method_sent, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
+  internal ACTION - removeups(account [caller]) // Will remove blacklisted user's ups retroactively
   internal ACTION - updatetotal(songid) // keep single-row record of ups for each song
-  internal ACTION - updateiou(sending_account, receiving_account) // Makes sure people get paid
-  internal ACTION - removeiou([caller]) // All IOUS are removed from table, for performance
+  internal ACTION - updateiou(sender, receiver, amount, bool subtract) // Makes sure people get paid
+  internal ACTION - removeiou(sender, receiver) // All IOUS are removed from table, for performance
   internal ACTION - updatelistener(account) // Keep track of total account amounts for ALL users
   internal ACTION - removelistener(account) // Remove record of user in event of blacklisting
   
@@ -28,7 +28,7 @@ ups.cxc {
     song (songid)
     ups_type (0,1,2,3)(Solx Up, Blux Up, Sol with Big Ups)
     ups_count
-    method // Set if this UP is from cXc.world or another MAY NEED NONCE
+    method_sent // Set if this UP is from cXc.world or another MAY NEED NONCE
     tuid 
   ]
   
@@ -127,16 +127,24 @@ updatetotal()
 - CONTRACT soldisk.cxc is notified and calls LISTEN => ups.cxc:updatetotal()
 
 
-updateiou(sender, reciever, type, amount)
-- IF token=purple CHECK (contract == approved_contracts)
+updateiou()
+//- IF token=purple CHECK (contract == approved_contracts) MOVED to separate Charts contract. 
 - if (record exists in |ious|)
   - UPDATE record from |ious|
   - else 
   - INSERT record into |ious|
 
 
-removeiou(sender, reciever, type, amount)
-- DELETE record from |ious| 
+removeiou()
+- if (receiver = dummy_value && sender = dummy_value)
+  - return (failed) 
+- if (receiver = dummy_value)
+- DELETE all records from |ious| where sender = sender
+- else if (sender = dummy_value)
+- DELETE all record from |ious| where reciever = reciever
+- else 
+- DELETE records from |ious| where reciever = reciever && sender = sender
+
 
 
 payup(account, type = personal) // type can also be 'group'
@@ -163,9 +171,11 @@ updateartist(caller)
 
 
 updateartistgroup()
-- CHECK (artists.length = weights.length OR 0 weights) // 0 = all the same
-- IF (exists |artists => account|)
-- UPDATE |artistgroups => artist_info|)
+- CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
+
+- IF (exists |artistgroup => internal_name|) // Check member list 
+  - CHECK (exists |artistgroup => artists => account|)
+  - UPDATE |artistgroups => artist_info|)
 - else 
 - INSERT |artistgroups|
 
@@ -177,3 +187,13 @@ updatesong(songid, info)
 - UPDATE |songs = songid|)
 - else 
 - INSERT |songs|
+
+
+updatelistener()
+- CHECK (caller = AUTH_ACCOUNT)
+- UPDATE record from |listeners| 
+
+
+removelistener()
+- CHECK (caller = AUTH_ACCOUNT)
+- DELETE record from |listeners| 
