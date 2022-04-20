@@ -7,7 +7,7 @@ using namespace eosio;
 class [[eosio::contract]] ups public eosio::contract {
 private:
   
-  int32_t timeunit;
+  uint32_t timeunit;
   
   // Artist Types: { 1: solo, 2: group}
   
@@ -97,8 +97,8 @@ private:
     name recipient;
     uint64_t template_id; // Considering options and waiting on Emanate
     
-    auto primary_key() const { return account.value; }
-    // Waiting
+    auto primary_key() const { return songid.value; }
+    // Waiting on Emanate to see if we'll use something to connect them
   };
   
   struct [[eosio::table]] artists {
