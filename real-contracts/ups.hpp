@@ -1,17 +1,22 @@
 #include <eosio/eosio.hpp>
-#include "songs.hpp"
+
 
 using namespace std;
 using namespace eosio;
+using std::string;
 
-class [[eosio::contract]] ups public eosio::contract {
+class [[eosio::contract]] ups : public eosio::contract {
+  
 private:
+  
+  // --- Bring in song, genres, moods, formats --- \\
+  #include "songs.hpp"
   
   uint32_t timeunit;
   
   // Artist Types: { 1: solo, 2: group}
   
-  std::string AUTH_ACCOUNTS[] const = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
+  std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
   
   enum up_type: uint8_t {
     SOL = 1,
@@ -24,10 +29,10 @@ private:
     DAPPMOBILE = 2,
     DAPPFREE = 3,
     DAPPMOBILEFREE = 4,
-    CONTRACT = 9
+    CONTRACT = 5
   };
   
-  struct [[eosio::table]] ups {
+  struct [[eosio::table]] upslog {
     uint64_t upid;
     uint64_t songid;
     uint8_t ups_type;
@@ -36,32 +41,32 @@ private:
     uint32_t tuid;
   
     auto primary_key() const { return upid; }
-    uint64_t by_songid() const { return songid.value; }
-    uint64_t by_ups_type() const { return (uint64_t)ups_type.value; }
-    uint64_t by_ups_count() const { return (uint64_t)ups_count.value; }
-    uint64_t by_tuid() const { return (uint64_t)tuid.value; }
+    uint64_t by_songid() const { return songid; }
+    uint64_t by_ups_type() const { return (uint64_t)ups_type; }
+    uint64_t by_ups_count() const { return (uint64_t)ups_count; }
+    uint64_t by_tuid() const { return (uint64_t)tuid; }
   };
   
-  typedef multi_index<name("ups"), ups,
-    eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<proposals, uint64_t, &ups::by_songid>>,
-    eosio::indexed_by<"byupstype"_n, eosio::const_mem_fun<proposals, uint64_t, &ups::by_ups_type>>,
-    eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<proposals, uint64_t, &ups::by_ups_count>>,
-    eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<proposals, uint64_t, &ups::by_tuid>>
+  typedef multi_index<name("upslog"), upslog,
+    eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_songid>>,
+    eosio::indexed_by<"byupstype"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_type>>,
+    eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_count>>,
+    eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
   > ups_table;
   
   struct [[eosio::table]] totals {
     uint32_t song;
     uint8_t ups_type;
     uint32_t ups_count;
-    time_point_sec updated;
+    uint32_t updated;
     
-    auto primary_key() const { return song.value; }
+    auto primary_key() const { return song; }
   };
   
   struct [[eosio::table]] listeners {
     name account;
-    time_point_sec first_vote;
-    time_point_sec last_vote;
+    uint32_t first_vote;
+    uint32_t last_vote;
     uint32_t total_sol_ups;
     uint32_t total_sol_ups;
     uint32_t total_big_ups;
@@ -73,16 +78,16 @@ private:
     uint64_t iouid;
     name sending_account;
     name receiving_account;
-    name receiving_account_type;
+    uint8_t receiving_account_type;
     uint32_t ups_count;
     uint8_t ups_type;
-    time_point_sec initiated;
+    uint32_t initiated;
     
     auto primary_key() const { return iouid; }
     uint64_t by_receiving_account() const { return receiving_account.value; }
-    uint64_t by_receiving_account_type() const { return receiving_account_type.value; }
-    uint64_t by_ups_count() const { return (uint64_t)ups_count.value; }
-    uint64_t by_initiated() const { return initiated.value; }
+    uint64_t by_receiving_account_type() const { return (uint64_t) receiving_account_type; }
+    uint64_t by_ups_count() const { return (uint64_t)ups_count; }
+    uint64_t by_initiated() const { return (uint64_t) initiated; }
   };
   
   typedef multi_index<name("ious"), ious,
@@ -95,9 +100,9 @@ private:
   struct [[eosio::table]] songs {
     uint32_t songid;
     name recipient;
-    uint64_t template_id; // Considering options and waiting on Emanate
+    uint64_t template_id; // CHECK WARN Considering options and waiting on Emanate
     
-    auto primary_key() const { return songid.value; }
+    auto primary_key() const { return songid; }
     // Waiting on Emanate to see if we'll use something to connect them
   };
   
@@ -123,11 +128,11 @@ private:
   };
   
   struct [[eosio::table]] internallog {
-    time_point_sec last_pay;
-    time_point_sec last_full_pay; 
+    uint32_t last_pay;
+    uint32_t last_full_pay; 
     bool remaining; // Did we reach the end of who is owed to pay? 
     
-    auto primary_key() const { return last_pay.value; } //CHECK if this is valid +  
+    auto primary_key() const { return (uint64_t) last_pay::time_point_sec(); } //CHECK if this is valid +  
   };
   
   void updateup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
@@ -138,9 +143,10 @@ private:
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
   void updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account);
   void removelisten(name account);
-  void removesong(uint64_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
+  void removesong(uint64_t songid); // Removes all IOUs for song + song record (minimal)
+  void deepremvsong(uint64_t songid); // Removes all records of Ups for this sond
   
-  // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\
+  // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
   void updateartist(name account, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
 
   

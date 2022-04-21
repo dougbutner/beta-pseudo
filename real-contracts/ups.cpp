@@ -24,11 +24,12 @@ void ups::payup(void) {
     
   // TRANSFER the total sum owed to account[s]
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
+  
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
 void ups::payup(name account) {
-// Same as above but with account
+// Same as above but with account return;
 }
 
 // --- Register artist, or change artist information --- \\
@@ -36,7 +37,7 @@ void ups::updateartist(name account, vector<string> artist_info, string artist_n
   // IF (exists |artists => account|)
   // UPDATE |artists => artist_info|
   // else 
-  // INSERT record into |artists|
+  // INSERT record into |artists| return;
 }
 
 // --- Register artist group, or change group information --- \\
@@ -52,6 +53,7 @@ void ups::updategroup(name internal_name, string group_name, vector<string> arti
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
 void ups::updatesong(uint32_t songid, vector<string>) {
+  // NOTE : Music 
   // NOTE: MUST remove the '-' from genres coming from cXc.world
   // CHECK (sender = artist || sender = AUTH_ACCOUNT)
     // if (group) CHECK (sender is in |artistgroups|)
@@ -59,4 +61,15 @@ void ups::updatesong(uint32_t songid, vector<string>) {
   // UPDATE |songs = songid|)
   // else 
   // INSERT |songs|
+}
+
+
+// --- Remove the song from earning potential --- \\
+void ups::removesong(uint64_t songid) {
+
+}
+
+// --- Remove all record of song in state --- \\
+void ups::deepremvsong(uint64_t songid) {
+
 }
