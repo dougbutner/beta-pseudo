@@ -4,17 +4,20 @@
 
 ups.cxc { 
   LISTEN => transfer (SOL, BLUX)
-  ACTION payup(account) // Send payments listed in |ious|  
+  ACTION payup(void) // Send all owed payments listed in |ious|  
+  ACTION payup(account) // Send owed payments listed in |ious| for one account
   ACTION updateartist(account, googleid) // Register artist, or change artist information
-  ACTION updateartistgroup(internal_name, artist_info, {members}, {weights}) // Register artist group, or change artist information
+  ACTION updateartistgroup(internal_name, group_info, {members}, {weights}) // Register artist group, or change group information
   ACTION updatesong(songID, {info}) // Who gets paid for each cXc post, by songid (internal cXc.world id)
+  ACTION removesong(); // 
+
 
   internal ACTION - updateup(ups_count, ups_type, [caller]) // Checks + calls logup() updateiou() and updatetotal()
   internal ACTION - logup(ups_count, ups_type, method_sent, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
   internal ACTION - removeups(account [caller]) // Will remove blacklisted user's ups retroactively
-  internal ACTION - updatetotal(songid) // keep single-row record of ups for each song
+  internal ACTION - updatetotal(songid) // Single-row record of ups for each song
   internal ACTION - updateiou(sender, receiver, amount, bool subtract) // Makes sure people get paid
-  internal ACTION - removeiou(sender, receiver) // All IOUS are removed from table, for performance
+  internal ACTION - removeiou(sender, receiver) // All IOUS are removed from table once paid, for performance
   internal ACTION - updatelistener(account) // Keep track of total account amounts for ALL users
   internal ACTION - removelistener(account) // Remove record of user in event of blacklisting
   
@@ -181,6 +184,7 @@ updateartistgroup()
 
 
 updatesong(songid, info)
+// NOTE: MUST remove the '-' from genres coming from cXc.world
 - CHECK (sender = artist || sender = AUTH_ACCOUNT)
   - if (group) CHECK (sender is in |artistgroups|)
 - IF (exists |so => account|)
@@ -197,3 +201,17 @@ updatelistener()
 removelistener()
 - CHECK (caller = AUTH_ACCOUNT)
 - DELETE record from |listeners| 
+
+removesong()
+// Remove the song from earning potential
+- CHECK (caller = AUTH_ACCOUNT || caller = recipient)
+- DELETE all record from |ious| where reciever = caller
+- DELETE record from |songs| 
+
+
+deepremvsong()
+// Remove all record of song in state
+- CHECK (caller = AUTH_ACCOUNT || caller = recipient)
+- call removesong()
+- DELETE all record from |ups| where reciever = caller
+- DELETE record from |totals| 
