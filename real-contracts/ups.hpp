@@ -1,16 +1,19 @@
 #include <eosio/eosio.hpp>
 
+#include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace eosio;
 using std::string;
 
+
 class [[eosio::contract]] ups : public eosio::contract {
   
+  using contract::contract;
 private:
   
   // --- Bring in song, genres, moods, formats --- \\
-  #include "songs.hpp"
   
   uint32_t timeunit;
   
@@ -21,7 +24,7 @@ private:
   enum up_type: uint8_t {
     SOL = 1,
     BLUX = 2,
-    BIG = 3
+    BIG = 3,
   };
   
   enum method_sent: uint8_t {
@@ -29,7 +32,7 @@ private:
     DAPPMOBILE = 2,
     DAPPFREE = 3,
     DAPPMOBILEFREE = 4,
-    CONTRACT = 5
+    CONTRACT = 5,
   };
   
   struct [[eosio::table]] upslog {
@@ -52,7 +55,7 @@ private:
     eosio::indexed_by<"byupstype"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_type>>,
     eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_count>>,
     eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
-  > ups_table;
+  > upslog_table;
   
   struct [[eosio::table]] totals {
     uint32_t song;

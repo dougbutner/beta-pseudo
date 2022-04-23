@@ -1,4 +1,5 @@
-#include "helpups.cpp"
+#include "ups.hpp"
+#include "songs.cpp"
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 

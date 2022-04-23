@@ -10,8 +10,9 @@ struct song {
   string googleid;
 };
 
+
 enum genres: uint8_t {
-  NULL = 0,
+  NONE = 0, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
   CONSCIOUS = 1,
   TRANCE = 2,
   HOUSE = 3,
@@ -54,7 +55,7 @@ enum genres: uint8_t {
 };
 
 enum moods: uint8_t {
-  NULL = 0,
+  NONE = 0,// NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word
   CHILL = 1,
   SPIRITUAL = 2,
   HAPPY = 3,
@@ -79,7 +80,7 @@ enum moods: uint8_t {
 };
 
 enum formats: uint8_t {
-  NULL = 0,
+  NONE = 0,
   NFT = 1,
   MUSICVIDEO = 2,
   SONG = 3,
