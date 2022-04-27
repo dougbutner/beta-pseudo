@@ -1,5 +1,7 @@
 #include <eosio/eosio.hpp>
 
+#include "songs.hpp"
+
 #include <iostream>
 #include <vector>
 
@@ -24,7 +26,7 @@ private:
   enum up_type: uint8_t {
     SOL = 1,
     BLUX = 2,
-    BIG = 3,
+    BIG = 3
   };
   
   enum method_sent: uint8_t {
@@ -32,7 +34,7 @@ private:
     DAPPMOBILE = 2,
     DAPPFREE = 3,
     DAPPMOBILEFREE = 4,
-    CONTRACT = 5,
+    CONTRACT_ = 5
   };
   
   struct [[eosio::table]] upslog {
@@ -71,7 +73,7 @@ private:
     uint32_t first_vote;
     uint32_t last_vote;
     uint32_t total_sol_ups;
-    uint32_t total_sol_ups;
+    uint32_t total_blu_ups;
     uint32_t total_big_ups;
     
     auto primary_key() const { return account.value; }
@@ -94,10 +96,10 @@ private:
   };
   
   typedef multi_index<name("ious"), ious,
-    eosio::indexed_by<"byrecacc"_n, eosio::const_mem_fun<proposals, uint64_t, &ious::by_receiving_account>>,
-    eosio::indexed_by<"byrecacctype"_n, eosio::const_mem_fun<proposals, uint64_t, &ious::by_receiving_account_type>>,
-    eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<proposals, uint64_t, &ious::by_ups_count>>,
-    eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<proposals, uint64_t, &ious::by_initiated>>
+    eosio::indexed_by<"byrecacc"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_receiving_account>>,
+    eosio::indexed_by<"byrecacctype"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_receiving_account_type>>,
+    eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_ups_count>>,
+    eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>
   > ious_table;
   
   struct [[eosio::table]] songs {
@@ -135,7 +137,7 @@ private:
     uint32_t last_full_pay; 
     bool remaining; // Did we reach the end of who is owed to pay? 
     
-    auto primary_key() const { return (uint64_t) last_pay::time_point_sec(); } //CHECK if this is valid +  
+    auto primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
   };
   
   void updateup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
@@ -163,5 +165,5 @@ public:
   [[eosio::action]]
   void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
   [[eosio::action]]
-  void updatesong(uint32_t songid, song& song); //CHECK I'm not sure how to put in song custom struct
+  void updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
 };
