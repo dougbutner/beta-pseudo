@@ -51,7 +51,7 @@ up_type { // ENUM uint8_t
 
 ```
 
-> Please note - Function names and variable names change from psuedo-code to real code to account for character limits and conventions.
+> Please note - Function names and variable names change slightly from psuedo-code to real code to account for character limits and conventions.
 
 
 ## Differences from Purple Explainer
@@ -61,8 +61,9 @@ We have had to make some changes for performance. Here's how it will work now.
 
 - Users must have a Soldisk (renamed from Solar Disk) with at least 1 PURPLE attached. 
 - Levels now exist on Soldisks
-- SOL will now be a regular eosio.token contract, so users can vote without the app. 
-- This means users can trade SOL (unplanned) so we've added a requirement that 20% of SOL received must be used for Sol Ups or the user won't be able to claim more SOL 
+- SOL will now be a regular eosio.token contract, so users can vote by interacting with smart contracts. 
+- Soldisk is no longer required to Up, but still required to claim SOL
+- This means users can trade SOL (unplanned) so we've added a requirement that 20% of SOL received must be used for Sol Ups or the user won't be able to claim more SOL from their Soldisk (Not Finalized)
 - There is no 12-hour wait to claim, users can claim up to every Time Unit (5 minutes), and up to the maximum allowed by their level
 - Low-level Solar Disks are allowed to claim 1 SOL per time unit passed (not based on  max charge). Next-claim reward amount will not increase after daily limit is reached. 
 - Listeners will be be paid BLUX
