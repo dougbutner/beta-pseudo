@@ -156,14 +156,22 @@ private:
 
   
 public:
+  
+  [[eosio::on_notify("*::transfer")]] // Listens for any token transfer
+  void on_transfer( const name from, const name to, const asset quantity, const std::string memo );
+  
   [[eosio::action]]
   void payup(void); // Default call by AUTH_ACCOUNTS
+  
   [[eosio::action]]
   void payup(name account); // User's call to pay themselves
+  
   [[eosio::action]]
   void updateartist(name account, vector<string> artist_info, string artist_name);
+  
   [[eosio::action]]
   void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+  
   [[eosio::action]]
   void updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
 };

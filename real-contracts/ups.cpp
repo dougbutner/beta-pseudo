@@ -10,6 +10,14 @@ void updategroup(name internal_name, string group_name, vector<string> artists, 
 void updatesong(uint32_t songid, vector<string>);
 
 
+// --- Recieve tokens sent to contract + make ups --- \\
+
+void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
+{
+  // authenticate incoming `from` account
+  require_auth( from );  
+}
+
 // --- Send all owed payments listed in |ious|  --- \\
 void ups::payup(void) {
   // if (account = undefined) account = all_accounts
@@ -26,11 +34,14 @@ void ups::payup(void) {
   // TRANSFER the total sum owed to account[s]
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
   
+
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
 void ups::payup(name account) {
-// Same as above but with account return;
+// Same as above but with account
+
+
 }
 
 // --- Register artist, or change artist information --- \\
@@ -51,6 +62,8 @@ void ups::updategroup(name internal_name, string group_name, vector<string> arti
   // else 
   // INSERT |artistgroups|
 }
+
+
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
 void ups::updatesong(uint32_t songid, vector<string>) {
