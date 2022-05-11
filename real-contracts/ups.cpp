@@ -12,10 +12,17 @@ void updatesong(uint32_t songid, vector<string>);
 
 // --- Receive tokens sent to contract + make ups --- \\
 
-void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
+[[eosio::on_notify("sol.cxc")]] void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
 {
-  // authenticate incoming `from` account
-  require_auth( from );  
+  // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
+  if (to != _self) return;
+  
+  // --- Make sure it's the right symbol --- \\
+  eosio::check(quantity.symbol == symbol("SOL", 0), "Now accepting SOL and BLUX");
+  
+  // --- Pass on to updateup() --- \\
+  
+
 }
 
 // --- Send all owed payments listed in |ious|  --- \\
