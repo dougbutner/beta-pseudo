@@ -20,9 +20,15 @@ void updatesong(uint32_t songid, vector<string>);
   // --- Make sure it's the right symbol --- \\
   eosio::check(quantity.symbol == symbol("SOL", 0), "Now accepting SOL and BLUX");
   
-  // --- Pass on to updateup() --- \\
+  // --- Set up Variables --- \\
+  uint32_t quantity = //CHECK 
   
-
+  
+  // --- Pass on to updateup() --- \\
+  //updateup(uint32_t quantity, uint8_t ups_type, name account);
+  updateup(quantity, 1, , name account); // 1=SOL Ups
+  }
+  
 }
 
 // --- Send all owed payments listed in |ious|  --- \\

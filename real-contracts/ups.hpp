@@ -29,20 +29,12 @@ private:
     BIG = 3
   };
   
-  enum method_sent: uint8_t {
-    DAPP = 1,
-    DAPPMOBILE = 2,
-    DAPPFREE = 3,
-    DAPPMOBILEFREE = 4,
-    CONTRACT_ = 5
-  };
   
   struct [[eosio::table]] upslog {
     uint64_t upid;
     uint64_t songid;
     uint8_t ups_type;
     uint32_t ups_count;
-    uint8_t method_sent;
     uint32_t tuid;
   
     auto primary_key() const { return upid; }
@@ -140,13 +132,13 @@ private:
     auto primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
   };
   
-  void updateup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
-  void logup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
+  void updateup(uint32_t ups_count, uint8_t ups_type, name account); 
+  void logup(uint32_t ups_count, uint8_t ups_type, name account); 
   void removeups(name user); 
-  void updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
+  void updatetotal(uint32_t ups_count, uint8_t ups_type, name account); 
   void updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
-  void updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account);
+  void updatelisten(uint32_t ups_count, uint8_t ups_type, name account);
   void removelisten(name account);
   void removesong(uint64_t songid); // Removes all IOUs for song + song record (minimal)
   void deepremvsong(uint64_t songid); // Removes all records of Ups for this sond
