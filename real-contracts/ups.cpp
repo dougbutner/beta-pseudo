@@ -10,7 +10,7 @@ void updategroup(name internal_name, string group_name, vector<string> artists, 
 void updatesong(uint32_t songid, vector<string>);
 
 
-// --- Recieve tokens sent to contract + make ups --- \\
+// --- Receive tokens sent to contract + make ups --- \\
 
 void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
 {
@@ -21,11 +21,22 @@ void ups::on_transfer( const name from, const name to, const asset quantity, con
 // --- Send all owed payments listed in |ious|  --- \\
 void ups::payup(void) {
   // if (account = undefined) account = all_accounts
+  
+  // check the time to ensure it's been 5 minutes
+  
+  
+  
   // if (account = all_accounts) 
       // CHECK (account = AUTH_ACCOUNT)
 
   // READ the |ups.cxc => ious| table for account
+  auto user_iterator = _ups.find(username.value);
+  
+  auto& ur_ious = _ious.get(username.value, "User doesn't exist");
+  
     // Make [] with each record of owed to depth of 12 rows, starting with oldest
+    
+    
 
   // if (account is group)
     // READ |artistgroups => pay_position|
@@ -34,12 +45,19 @@ void ups::payup(void) {
   // TRANSFER the total sum owed to account[s]
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
   
+  _ious.modify(user, username, [&](auto& modified_user) {
+
+    // Assign the newly created game to the player
+    modified_user.game_data = game_data;
+  });
+  
 
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
 void ups::payup(name account) {
 // Same as above but with account
+  require_auth(username);
 
 
 }

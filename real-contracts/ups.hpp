@@ -153,6 +153,9 @@ private:
   
   // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
   void updateartist(name account, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
+  
+  ious_table _ious;
+  upslog_table _upslog;
 
   
 public:
