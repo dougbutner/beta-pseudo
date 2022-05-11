@@ -15,10 +15,17 @@ void updatesong(uint32_t songid, vector<string>);
 [[eosio::on_notify("sol.cxc")]] void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
 {
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
-  if (to != _self) return;
+  if (to != _self) return; // internal function no need to check()
+
   
   // --- Make sure it's the right symbol --- \\
-  eosio::check(quantity.symbol == symbol("SOL", 0), "Now accepting SOL and BLUX");
+  check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");
+  
+  // --- Check and Format Memo --- \\ 
+  songs _songs(_self, _self.value);
+  
+  
+  
   
   // --- Set up Variables --- \\
   uint32_t quantity = //CHECK 
@@ -26,7 +33,7 @@ void updatesong(uint32_t songid, vector<string>);
   
   // --- Pass on to updateup() --- \\
   //updateup(uint32_t quantity, uint8_t ups_type, name account);
-  updateup(quantity, 1, , name account); // 1=SOL Ups
+  updateup(quantity, 1, account, ); // 1=SOL Ups
   }
   
 }

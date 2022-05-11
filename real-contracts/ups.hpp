@@ -37,7 +37,7 @@ private:
     uint32_t ups_count;
     uint32_t tuid;
   
-    auto primary_key() const { return upid; }
+    uint64_t primary_key() const { return upid; }
     uint64_t by_songid() const { return songid; }
     uint64_t by_ups_type() const { return (uint64_t)ups_type; }
     uint64_t by_ups_count() const { return (uint64_t)ups_count; }
@@ -57,7 +57,7 @@ private:
     uint32_t ups_count;
     uint32_t updated;
     
-    auto primary_key() const { return song; }
+    uint64_t primary_key() const { return song; }
   };
   
   struct [[eosio::table]] listeners {
@@ -68,7 +68,7 @@ private:
     uint32_t total_blu_ups;
     uint32_t total_big_ups;
     
-    auto primary_key() const { return account.value; }
+    uint64_t primary_key() const { return account.value; }
   };
   
   struct [[eosio::table]] ious {
@@ -80,7 +80,7 @@ private:
     uint8_t ups_type;
     uint32_t initiated;
     
-    auto primary_key() const { return iouid; }
+    uint64_t primary_key() const { return iouid; }
     uint64_t by_receiving_account() const { return receiving_account.value; }
     uint64_t by_receiving_account_type() const { return (uint64_t) receiving_account_type; }
     uint64_t by_ups_count() const { return (uint64_t)ups_count; }
@@ -99,9 +99,11 @@ private:
     name recipient;
     uint64_t template_id; // CHECK WARN Considering options and waiting on Emanate
     
-    auto primary_key() const { return songid; }
+    uint64_t primary_key() const { return songid; }
     // Waiting on Emanate to see if we'll use something to connect them
   };
+  
+  typedef multi_index<name("songs"), songs> songs_table;
   
   struct [[eosio::table]] artists {
     name account;
@@ -109,7 +111,7 @@ private:
     string artist_name;
     vector<string> artist_info;
     
-    auto primary_key() const { return account.value; }
+    uint64_t primary_key() const { return account.value; }
   };
   
   struct [[eosio::table]] artistgroups {
@@ -121,7 +123,7 @@ private:
     vector<string> artist_info; // CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs
     uint8_t pay_position;  
     
-    auto primary_key() const { return internal_name.value; }
+    uint64_t primary_key() const { return internal_name.value; }
   };
   
   struct [[eosio::table]] internallog {
@@ -129,11 +131,11 @@ private:
     uint32_t last_full_pay; 
     bool remaining; // Did we reach the end of who is owed to pay? 
     
-    auto primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
+    uint64_t primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
   };
   
-  void updateup(uint32_t ups_count, uint8_t ups_type, name account); 
-  void logup(uint32_t ups_count, uint8_t ups_type, name account); 
+  void updateup(uint32_t ups_count, uint8_t ups_type, name account, uint64_t songid); 
+  void logup(uint32_t ups_count, uint8_t ups_type, name account, uint64_t songid); 
   void removeups(name user); 
   void updatetotal(uint32_t ups_count, uint8_t ups_type, name account); 
   void updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
@@ -148,6 +150,9 @@ private:
   
   ious_table _ious;
   upslog_table _upslog;
+  songs_table _songs;
+  
+  
 
   
 public:
