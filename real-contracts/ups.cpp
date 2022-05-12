@@ -12,7 +12,7 @@ void updatesong(uint32_t songid, vector<string>);
 
 // --- Receive tokens sent to contract + make ups --- \\
 
-[[eosio::on_notify("sol.cxc")]] void ups::on_transfer( const name from, const name to, const asset quantity, const string memo )
+[[eosio::on_notify("sol.cxc")]] void on_transfer( const name from, const name to, const asset quantity, const string memo )
 {
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
   if (to != _self) return; // internal function no need to check()
@@ -44,7 +44,7 @@ void ups::payup(void) {
       // CHECK (account = AUTH_ACCOUNT)
 
   // READ the |ups.cxc => ious| table for account
-  auto user_iterator = _ups.find(username.value);
+  auto user_iterator = _ups.find(username.value); // WARN jumped to other thing, this is not good
   
   auto& ur_ious = _ious.get(username.value, "User doesn't exist");
   
