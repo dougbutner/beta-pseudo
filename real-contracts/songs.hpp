@@ -11,7 +11,7 @@ struct song {
   enum<uint8_t> genre;
   enum<uint8_t> mood;
   enum<uint8_t> format;
-  string googleid;
+  string atomictempid;
 };
 
 
