@@ -12,8 +12,8 @@ ups.cxc {
   ACTION removesong(); // 
 
 
-  internal ACTION - updateup(ups_count, ups_type, [caller]) // Checks + calls logup() updateiou() and updatetotal()
-  internal ACTION - logup(ups_count, ups_type, method_sent, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
+  internal ACTION - updateup(ups_count, ups_type, songid, [caller]) // Checks + calls logup() updateiou() and updatetotal()
+  internal ACTION - logup(ups_count, ups_type, songid, [caller]) // Store persistent record of UP in |ups| WARNING: consider performance
   internal ACTION - removeups(account [caller]) // Will remove blacklisted user's ups retroactively
   internal ACTION - updatetotal(songid) // Single-row record of ups for each song
   internal ACTION - updateiou(sender, receiver, amount, bool subtract) // Makes sure people get paid
@@ -31,7 +31,7 @@ ups.cxc {
     song (songid)
     ups_type (0,1,2,3)(Solx Up, Blux Up, Sol with Big Ups)
     ups_count
-    method_sent // Set if this UP is from cXc.world or another MAY NEED NONCE
+
     tuid 
   ]
   
@@ -109,7 +109,6 @@ logup()
 
 
 updateup()
-- IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
 - call ACTION updatetotal()
 - call ACTION logup()
 - call ACTION updateiou()
