@@ -21,14 +21,18 @@ void updatesong(uint32_t songid, vector<string>);
   // --- Make sure it's the right symbol --- \\
   check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");
   
+  
+  
   // --- Check and Format Memo --- \\ 
-  songs _songs(_self, _self.value);
+  uint32_t songid = uint32_t(memo); // WARN CHECK need to be sure this won't fuck up on a string
+  //auto song_iter =  _songs.begin();
+  auto song_iter = _songs.require_find( songid, string( "Song " + to_string(songid) + " was not found." ).c_str() );
   
   
-  
+
   
   // --- Set up Variables --- \\
-  uint32_t quantity = //CHECK 
+  uint32_t quantity = uint32_t(quantity);
   
   
   // --- Pass on to updateup() --- \\
