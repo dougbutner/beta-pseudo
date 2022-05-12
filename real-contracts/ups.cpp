@@ -1,5 +1,5 @@
 #include "ups.hpp"
-#include "songs.cpp"
+#include "songs.hpp"
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
@@ -17,28 +17,18 @@ void updatesong(uint32_t songid, vector<string>);
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
   if (to != _self) return; // internal function no need to check()
 
-  
   // --- Make sure it's the right symbol --- \\
-  check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");
-  
-  
+  check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");  
   
   // --- Check and Format Memo --- \\ 
   uint32_t songid = uint32_t(memo); // WARN CHECK need to be sure this won't fuck up on a string
-  //auto song_iter =  _songs.begin();
   auto song_iter = _songs.require_find( songid, string( "Song " + to_string(songid) + " was not found." ).c_str() );
-  
-  
-
   
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
   
-  
   // --- Pass on to updateup() --- \\
-  //updateup(uint32_t quantity, uint8_t ups_type, name account);
-  updateup(quantity, 1, account, ); // 1=SOL Ups
-  }
+  updateup(quantity, 1, songid, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
   
 }
 
@@ -68,13 +58,7 @@ void ups::payup(void) {
     
   // TRANSFER the total sum owed to account[s]
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
-  
-  _ious.modify(user, username, [&](auto& modified_user) {
 
-    // Assign the newly created game to the player
-    modified_user.game_data = game_data;
-  });
-  
 
 }
 
