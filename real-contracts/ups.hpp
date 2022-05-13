@@ -1,10 +1,9 @@
+
+#include "eosio/eosio.hpp"
 #include <eosio/asset.hpp>
-#include <eosio/eosio.hpp>
-
-#include "songs.hpp"
-
-
 #include <vector>
+
+
 
 
 
@@ -13,10 +12,112 @@ using namespace eosio;
 using std::string;
 
 
-class [[eosio::contract]] ups : public eosio::contract {
+class [[eosio::contract]] ups : public contract {
   
-  using eosio::contract::contract;
+  using contract::contract;
+  
+public:
+
+  enum genre : uint8_t {
+    DEFGENRE, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
+    CONSCIOUS,
+    TRANCE,
+    HOUSE,
+    TECHNO,
+    ELECTRONIC,
+    EXPERIMENTAL,
+    EDM,
+    BLUES,
+    SOUL,
+    FUNK,
+    FUSION,
+    LOFI,
+    JAZZ,
+    CULTURAL,
+    REGGAE,
+    POP,
+    CINEMATIC,
+    CLASSICAL,
+    HIPHOP,
+    RAP,
+    RNB,
+    REGGAETON,
+    ROCK,
+    PUNK,
+    INDIE,
+    TRIPHOP,
+    ALTERNATIVE,
+    METAL,
+    LATIN,
+    SALSA,
+    SAMBA,
+    BOSSANOVA,
+    SOUNDSCAPE,
+    SPOKENWORD,
+    VOCAL,
+    CHORAL,
+    BALLAD,
+    BLUEGRASS,
+    COUNTRY
+  };
+
+  enum mood : uint8_t {
+    DEFMOOD,// NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word
+    CHILL,
+    SPIRITUAL,
+    HAPPY,
+    DANCE,
+    PARTY,
+    HIGH,
+    ENERGIZING,
+    UPLIFTING,
+    FOCUSED,
+    EMOTIONAL,
+    ANGRY,
+    WORKOUT,
+    PROVOCATIVE,
+    BALLIN,
+    HEAVY,
+    LIGHT,
+    SLEEPY,
+    INTROSPECTIVE,
+    TRIPPY,
+    MAGICAL,
+    ROMANTIC
+  };
+
+  enum format : uint8_t {
+    DEFFORMAT,
+    NFT,
+    MUSICVIDEO,
+    SONG,
+    ALBUM,
+    COVER,
+    INSTRUMENTAL,
+    INSTRUMENTALALBUM,
+    LIVE,
+    LIVESET,
+    REMIX,
+    PLAYLIST,
+    FREESTYLE,
+    SNIPPET,
+    SKIT
+  };
+  
 private:
+  
+  struct song {
+    string title;
+    vector<string> links;
+    vector<double> geoloc; // CHECK this is a real 
+    uint8_t genre;
+    uint8_t mood;
+    uint8_t format;
+    string atomictempid;
+  };
+
+
+
   
   // --- Bring in song, genres, moods, formats --- \\
   
@@ -154,7 +255,6 @@ private:
   ious_table _ious;
   upslog_table _upslog;
   songs_table _songs;
-  
   
 
   
