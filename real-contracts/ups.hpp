@@ -33,7 +33,7 @@ private:
   };
   
   
-  struct [[eosio::table]] upslog {
+  TABLE upslog {
     uint64_t upid;
     uint64_t songid;
     uint8_t ups_type;
@@ -54,7 +54,7 @@ private:
     eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
   > upslog_table;
   
-  struct [[eosio::table]] totals {
+  TABLE totals {
     uint32_t song;
     uint8_t ups_type;
     uint32_t ups_count;
@@ -63,7 +63,7 @@ private:
     uint64_t primary_key() const { return song; }
   };
   
-  struct [[eosio::table]] listeners {
+  TABLE listeners {
     name account;
     uint32_t first_vote;
     uint32_t last_vote;
@@ -74,7 +74,7 @@ private:
     uint64_t primary_key() const { return account.value; }
   };
   
-  struct [[eosio::table]] ious {
+  TABLE ious {
     uint64_t iouid;
     name sending_account;
     name receiving_account;
@@ -97,7 +97,7 @@ private:
     eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>
   > ious_table;
   
-  struct [[eosio::table]] songs {
+  TABLE songs {
     uint32_t songid;
     name recipient;
     uint64_t template_id; // CHECK WARN Considering options and waiting on Emanate
@@ -108,7 +108,7 @@ private:
   
   typedef multi_index<name("songs"), songs> songs_table;
   
-  struct [[eosio::table]] artists {
+  TABLE artists {
     name account;
     string googleid; // CHECK this needs to be NON-plaintext (hash based on account + timestamp salt )
     string artist_name;
@@ -117,7 +117,7 @@ private:
     uint64_t primary_key() const { return account.value; }
   };
   
-  struct [[eosio::table]] artistgroups {
+  TABLE artistgroups {
     string groupname;
     name internal_name; // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
     vector<name> artists;
@@ -129,7 +129,7 @@ private:
     uint64_t primary_key() const { return internal_name.value; }
   };
   
-  struct [[eosio::table]] internallog {
+  TABLE internallog {
     uint32_t last_pay;
     uint32_t last_full_pay; 
     bool remaining; // Did we reach the end of who is owed to pay? 
