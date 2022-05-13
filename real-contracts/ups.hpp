@@ -1,9 +1,12 @@
+#include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 
 #include "songs.hpp"
 
 
 #include <vector>
+
+
 
 using namespace std;
 using namespace eosio;
