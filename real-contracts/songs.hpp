@@ -8,9 +8,9 @@ struct song {
   string title;
   vector<string> links;
   vector<double> geoloc; // CHECK this is a real 
-  enum<uint8_t> genre;
-  enum<uint8_t> mood;
-  enum<uint8_t> format;
+  uint8_t genre;
+  uint8_t mood;
+  uint8_t format;
   string atomictempid;
 };
 

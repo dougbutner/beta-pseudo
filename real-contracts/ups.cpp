@@ -1,5 +1,5 @@
 #include "ups.hpp"
-#include "songs.hpp"
+#include <eosio/asset.hpp>
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
@@ -35,10 +35,7 @@ void updatesong(uint32_t songid, vector<string>);
 // --- Send all owed payments listed in |ious|  --- \\
 void ups::payup(void) {
   // if (account = undefined) account = all_accounts
-  
   // check the time to ensure it's been 5 minutes
-  
-  
   
   // if (account = all_accounts) 
       // CHECK (account = AUTH_ACCOUNT)

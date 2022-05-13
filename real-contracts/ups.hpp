@@ -2,7 +2,7 @@
 
 #include "songs.hpp"
 
-#include <iostream>
+
 #include <vector>
 
 using namespace std;
@@ -12,7 +12,7 @@ using std::string;
 
 class [[eosio::contract]] ups : public eosio::contract {
   
-  using contract::contract;
+  using eosio::contract::contract;
 private:
   
   // --- Bring in song, genres, moods, formats --- \\
