@@ -260,8 +260,8 @@ private:
   
 public:
   
-  [[eosio::on_notify("*::transfer")]] // Listens for any token transfer
-  void on_transfer( const name from, const name to, const asset quantity, const std::string memo );
+  [[eosio::on_notify("sol.cxc::transfer")]] // Listens for any token transfer
+  void sol_catch( const name from, const name to, const asset quantity, const std::string memo );
   
   [[eosio::action]]
   void payup(void); // Default call by AUTH_ACCOUNTS

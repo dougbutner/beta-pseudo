@@ -12,9 +12,10 @@ void updatesong(uint32_t songid, vector<string>);
 
 // --- Receive tokens sent to contract + make ups --- \\
 
-[[eosio::on_notify("sol.cxc::")]] void sol_catch( const name from, const name to, const asset quantity, const string memo )
+[[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {
-  name mebitches = get_self();
+  //name mebitches = get_self();
+   require_auth(get_self());
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
   if (to != _self) return; // internal function no need to check()
 
