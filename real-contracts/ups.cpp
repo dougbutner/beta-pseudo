@@ -1,5 +1,6 @@
-#include "ups.hpp"
 #include "helpups.cpp"
+#include "ups.hpp"
+
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
@@ -9,8 +10,8 @@ void payup(name up_sender); // User's call to pay themselves
 void updateartist(name up_sender, vector<string> artist_info, string artist_name);
 void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
 void updatesong(uint32_t songid, vector<string>);
-void removesong(uint64_t songid)
-void deepremvsong(uint64_t songid)
+void removesong(uint32_t songid)
+void deepremvsong(uint32_t songid)
 /*/
 
 // --- Receive tokens sent to contract + make ups --- \\
@@ -37,7 +38,7 @@ void deepremvsong(uint64_t songid)
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 1, song_iter, up_sender); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
+  updateup(quantity, 1, song_iter, up_sender.value); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
   
 }
 
@@ -111,11 +112,11 @@ void ups::updatesong(uint32_t songid, vector<string>) {
 
 
 // --- Remove the song from earning potential --- \\
-void ups::removesong(uint64_t songid) {
+void ups::removesong(uint32_t songid) {
 
 }
 
 // --- Remove all record of song in state --- \\
-void ups::deepremvsong(uint64_t songid) {
+void ups::deepremvsong(uint32_t songid) {
 
 }

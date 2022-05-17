@@ -8,22 +8,9 @@ void updateiou(name sender, name receiver, uint32_t amount, bool subtract);
 void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
 void updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender);
 void removelisten(name up_sender);
-void removesong(uint64_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
+void removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
 /*/
 
-// --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
-void ups::updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
-  // IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
-  // call ACTION updatetotal()
-  updatetotal(ups_count, ups_type, up_sender, songid);  
-  
-  // call ACTION logup()
-  logup(ups_count, ups_type, up_sender, songid);
-  
-  // call ACTION updateiou()
-  updateiou(ups_count, ups_type, up_sender, songid, 0);
-
-}
 
 // --- Store persistent record of UP in |ups| --- \\
 void ups::logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
@@ -88,4 +75,17 @@ void ups::removelisten(name up_sender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // DELETE record from |listeners|  
   
+}
+
+// --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
+void ups::updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
+  // IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
+  // call ACTION updatetotal()
+  updatetotal(ups_count, ups_type, up_sender, songid);  
+  
+  // call ACTION logup()
+  logup(ups_count, ups_type, up_sender, songid);
+  
+  // call ACTION updateiou()
+  updateiou(ups_count, ups_type, up_sender, songid, 0);
 }

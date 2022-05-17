@@ -51,15 +51,15 @@ private:
   
   TABLE upslog {
     uint64_t upid;
-    uint64_t songid;
+    uint32_t songid;
     uint8_t ups_type;
     uint32_t ups_count;
     uint32_t tuid;
   
     uint64_t primary_key() const { return upid; }
-    uint64_t by_songid() const { return songid; }
-    uint64_t by_ups_type() const { return (uint64_t)ups_type; }
-    uint64_t by_ups_count() const { return (uint64_t)ups_count; }
+    uint64_t by_songid() const { return (uint64_t) songid; }
+    uint64_t by_ups_type() const { return (uint64_t) ups_type; }
+    uint64_t by_ups_count() const { return (uint64_t) ups_count; }
     uint64_t by_tuid() const { return (uint64_t)tuid; }
   };
   
@@ -71,12 +71,12 @@ private:
   > upslog_table;
   
   TABLE totals {
-    uint32_t song;
+    uint32_t songid;
     uint8_t ups_type;
     uint32_t ups_count;
     uint32_t updated;
     
-    uint64_t primary_key() const { return song; }
+    uint64_t primary_key() const { return songid; }
   };
   
   TABLE listeners {
@@ -161,8 +161,8 @@ private:
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
   void updatelisten(uint32_t ups_count, uint8_t ups_type, name up_sender);
   void removelisten(name up_sender);
-  void removesong(uint64_t songid); // Removes all IOUs for song + song record (minimal)
-  void deepremvsong(uint64_t songid); // Removes all records of Ups for this sond
+  void removesong(uint32_t songid); // Removes all IOUs for song + song record (minimal)
+  void deepremvsong(uint32_t songid); // Removes all records of Ups for this sond
   
   // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
   void updateartist(name up_sender, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
