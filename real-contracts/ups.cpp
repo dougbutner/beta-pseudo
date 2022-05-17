@@ -13,29 +13,28 @@ void updatesong(uint32_t songid, vector<string>);
 // --- Receive tokens sent to contract + make ups --- \\
 
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
-{
+{  
   uint32_t songid_upped;
   require_auth(get_self());
+  
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
   if (to != _self) return; // internal function no need to check()
 
-  // --- Make sure it's the right symbol --- \\
+  // --- Token-symbol + Memo = Songid Check --- \\
   check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");  
+  songid_upped = stoi(memo); // Set memo (songid) to <int> 
   
   // --- Instantiate Table --- \\
+  _songs(_self, _self.value){}
   
-  
-  // --- Check and Format Memo --- \\ 
-  songid_upped = stoi(memo); // Set memo (songid) to the 
+  // --- Check for song in table --- \\ 
   auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
-  
-  
 
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 1, songid_upped, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
+  updateup(quantity, 1, song_iter, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
   
 }
 
