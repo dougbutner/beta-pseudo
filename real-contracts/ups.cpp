@@ -14,23 +14,28 @@ void updatesong(uint32_t songid, vector<string>);
 
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {
-  //name mebitches = get_self();
-   require_auth(get_self());
+  uint32_t songid_upped;
+  require_auth(get_self());
   // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
   if (to != _self) return; // internal function no need to check()
 
   // --- Make sure it's the right symbol --- \\
   check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");  
   
-  // --- Check and Format Memo --- \\ 
-  uint32_t songid = uint32_t(memo); // WARN CHECK need to be sure this won't fuck up on a string
-  auto song_iter = _songs.require_find( songid, string( "Song " + to_string(songid) + " was not found." ).c_str() );
+  // --- Instantiate Table --- \\
   
+  
+  // --- Check and Format Memo --- \\ 
+  songid_upped = stoi(memo); // Set memo (songid) to the 
+  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
+  
+  
+
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 1, songid, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
+  updateup(quantity, 1, songid_upped, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
   
 }
 
@@ -43,9 +48,9 @@ void ups::payup(void) {
       // CHECK (account = AUTH_ACCOUNT)
 
   // READ the |ups.cxc => ious| table for account
-  auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
+  //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   
-  auto& ur_ious = _ious.get(username.value, "User doesn't exist");
+  //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
   
     // Make [] with each record of owed to depth of 12 rows, starting with oldest
     
@@ -64,7 +69,7 @@ void ups::payup(void) {
 // --- Send owed payments listed in |ious| for one account --- \\
 void ups::payup(name account) {
 // Same as above but with account
-  require_auth(username);
+  //require_auth(username);
 
 
 }

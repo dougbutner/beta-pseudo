@@ -15,95 +15,10 @@ using std::string;
 class [[eosio::contract]] ups : public contract {
   
   using contract::contract;
-  
-public:
+public: 
 
-  enum genre : uint8_t {
-    DEFGENRE, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
-    CONSCIOUS,
-    TRANCE,
-    HOUSE,
-    TECHNO,
-    ELECTRONIC,
-    EXPERIMENTAL,
-    EDM,
-    BLUES,
-    SOUL,
-    FUNK,
-    FUSION,
-    LOFI,
-    JAZZ,
-    CULTURAL,
-    REGGAE,
-    POP,
-    CINEMATIC,
-    CLASSICAL,
-    HIPHOP,
-    RAP,
-    RNB,
-    REGGAETON,
-    ROCK,
-    PUNK,
-    INDIE,
-    TRIPHOP,
-    ALTERNATIVE,
-    METAL,
-    LATIN,
-    SALSA,
-    SAMBA,
-    BOSSANOVA,
-    SOUNDSCAPE,
-    SPOKENWORD,
-    VOCAL,
-    CHORAL,
-    BALLAD,
-    BLUEGRASS,
-    COUNTRY
-  };
+#include "songs.hpp"
 
-  enum mood : uint8_t {
-    DEFMOOD,// NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word
-    CHILL,
-    SPIRITUAL,
-    HAPPY,
-    DANCE,
-    PARTY,
-    HIGH,
-    ENERGIZING,
-    UPLIFTING,
-    FOCUSED,
-    EMOTIONAL,
-    ANGRY,
-    WORKOUT,
-    PROVOCATIVE,
-    BALLIN,
-    HEAVY,
-    LIGHT,
-    SLEEPY,
-    INTROSPECTIVE,
-    TRIPPY,
-    MAGICAL,
-    ROMANTIC
-  };
-
-  enum format : uint8_t {
-    DEFFORMAT,
-    NFT,
-    MUSICVIDEO,
-    SONG,
-    ALBUM,
-    COVER,
-    INSTRUMENTAL,
-    INSTRUMENTALALBUM,
-    LIVE,
-    LIVESET,
-    REMIX,
-    PLAYLIST,
-    FREESTYLE,
-    SNIPPET,
-    SKIT
-  };
-  
 private:
   
   struct song {
@@ -252,6 +167,8 @@ private:
   // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
   void updateartist(name account, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
   
+  
+  // CHECK - Is this instantiation innefficient? Better in actual actions? 
   ious_table _ious;
   upslog_table _upslog;
   songs_table _songs;

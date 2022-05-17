@@ -1,14 +1,5 @@
 // --- Songs Helper Contract for ups.cxc --- \\
 
-using namespace std;
-using namespace eosio;
-using std::string;
-
-
-
-
-
-/*/
 enum genre: uint8_t {
   NONE = 0, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
   CONSCIOUS = 1,
@@ -94,5 +85,3 @@ enum format: uint8_t {
   SNIPPET = 13,
   SKIT = 14
 };
-
-/*/
