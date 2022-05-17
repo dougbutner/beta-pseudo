@@ -80,14 +80,14 @@ private:
   };
   
   TABLE listeners {
-    name account;
+    name up_sender;
     uint32_t first_vote;
     uint32_t last_vote;
     uint32_t total_sol_ups;
     uint32_t total_blu_ups;
     uint32_t total_big_ups;
     
-    uint64_t primary_key() const { return account.value; }
+    uint64_t primary_key() const { return up_sender.value; }
   };
   
   TABLE ious {
@@ -125,12 +125,12 @@ private:
   typedef multi_index<name("songs"), songs> songs_table;
   
   TABLE artists {
-    name account;
+    name up_sender;
     string googleid; // CHECK this needs to be NON-plaintext (hash based on account + timestamp salt )
     string artist_name;
     vector<string> artist_info;
     
-    uint64_t primary_key() const { return account.value; }
+    uint64_t primary_key() const { return up_sender.value; }
   };
   
   TABLE artistgroups {
@@ -153,19 +153,19 @@ private:
     uint64_t primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
   };
   
-  void updateup(uint32_t ups_count, uint8_t ups_type, name account, uint64_t songid); 
-  void logup(uint32_t ups_count, uint8_t ups_type, name account, uint64_t songid); 
+  void updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
+  void logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
   void removeups(name user); 
-  void updatetotal(uint32_t ups_count, uint8_t ups_type, name account); 
-  void updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
+  void updatetotal(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
+  void updateiou(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender, bool subtract); 
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
-  void updatelisten(uint32_t ups_count, uint8_t ups_type, name account);
-  void removelisten(name account);
+  void updatelisten(uint32_t ups_count, uint8_t ups_type, name up_sender);
+  void removelisten(name up_sender);
   void removesong(uint64_t songid); // Removes all IOUs for song + song record (minimal)
   void deepremvsong(uint64_t songid); // Removes all records of Ups for this sond
   
   // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
-  void updateartist(name account, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
+  void updateartist(name up_sender, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
   
   
   // CHECK - Is this instantiation innefficient? Better in actual actions? 
@@ -184,10 +184,10 @@ public:
   void payup(void); // Default call by AUTH_ACCOUNTS
   
   [[eosio::action]]
-  void payup(name account); // User's call to pay themselves
+  void payup(name up_sender); // User's call to pay themselves
   
   [[eosio::action]]
-  void updateartist(name account, vector<string> artist_info, string artist_name);
+  void updateartist(name up_sender, vector<string> artist_info, string artist_name);
   
   [[eosio::action]]
   void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);

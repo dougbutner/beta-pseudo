@@ -1,14 +1,12 @@
 #include "ups.hpp"
 #include "helpups.cpp"
 
-
-
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
 /*/
 void payup(void); // Default call by AUTH_ACCOUNTS
-void payup(name account); // User's call to pay themselves
-void updateartist(name account, vector<string> artist_info, string artist_name);
+void payup(name up_sender); // User's call to pay themselves
+void updateartist(name up_sender, vector<string> artist_info, string artist_name);
 void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
 void updatesong(uint32_t songid, vector<string>);
 void removesong(uint64_t songid)
@@ -39,7 +37,7 @@ void deepremvsong(uint64_t songid)
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 1, song_iter, account); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name account)
+  updateup(quantity, 1, song_iter, up_sender); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
   
 }
 
@@ -71,7 +69,7 @@ void ups::payup(void) {
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
-void ups::payup(name account) {
+void ups::payup(name up_sender) {
 // Same as above but with account
   //require_auth(username);
 
@@ -79,7 +77,7 @@ void ups::payup(name account) {
 }
 
 // --- Register artist, or change artist information --- \\
-void ups::updateartist(name account, vector<string> artist_info, string artist_name) {
+void ups::updateartist(name up_sender, vector<string> artist_info, string artist_name) {
   // IF (exists |artists => account|)
   // UPDATE |artists => artist_info|
   // else 
