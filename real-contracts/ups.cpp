@@ -1,14 +1,19 @@
 #include "ups.hpp"
+#include "helpups.cpp"
+
 
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
+/*/
 void payup(void); // Default call by AUTH_ACCOUNTS
 void payup(name account); // User's call to pay themselves
 void updateartist(name account, vector<string> artist_info, string artist_name);
 void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
 void updatesong(uint32_t songid, vector<string>);
-
+void removesong(uint64_t songid)
+void deepremvsong(uint64_t songid)
+/*/
 
 // --- Receive tokens sent to contract + make ups --- \\
 

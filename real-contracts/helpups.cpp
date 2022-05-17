@@ -1,6 +1,5 @@
-#include "ups.hpp"
 
-
+/*/
 void updateup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
 void logup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account); 
 void removeups(name user); 
@@ -10,7 +9,7 @@ void removeiou(name sender, name receiver); // Receiver or sender can be set to 
 void updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account);
 void removelisten(name account);
 void removesong(uint64_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
-
+/*/
 
 // --- Checks + calls logup() updateiou() and updatetotal() --- \\
 void ups::updateup(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name account) {
