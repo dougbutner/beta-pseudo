@@ -5,7 +5,7 @@
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
 /*/
-void payup(void); // Default call by AUTH_ACCOUNTS
+void payup(void); // Default call 
 void payup(name up_sender); // User's call to pay themselves
 void updateartist(name up_sender, vector<string> artist_info, string artist_name);
 void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
@@ -29,7 +29,7 @@ void deepremvsong(uint32_t songid)
   songid_upped = stoi(memo); // Set memo (songid) to <int> 
   
   // --- Instantiate Table --- \\
-  _songs(_self, _self.value){}
+  _songs(_self, _self.value);
   
   // --- Check for song in table --- \\ 
   auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
@@ -46,11 +46,9 @@ void deepremvsong(uint32_t songid)
 void ups::payup(void) {
   // if (account = undefined) account = all_accounts
   // check the time to ensure it's been 5 minutes
-  
-  // if (account = all_accounts) 
-      // CHECK (account = AUTH_ACCOUNT)
 
-  // READ the |ups.cxc => ious| table for account
+
+  // READ the |ious.cxc => ious| table for account
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   
   //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
@@ -116,7 +114,7 @@ void ups::removesong(uint32_t songid) {
 
 }
 
-// --- Remove all record of song in state --- \\
+// --- Remove all record of song in RAM --- \\
 void ups::deepremvsong(uint32_t songid) {
 
 }

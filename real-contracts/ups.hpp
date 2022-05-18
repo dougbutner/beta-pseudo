@@ -1,11 +1,7 @@
 
 #include "eosio/eosio.hpp"
 #include <eosio/asset.hpp>
-#include <vector>
-
-
-
-
+#include <vector> //CHECK is needed? 
 
 using namespace std;
 using namespace eosio;
@@ -165,7 +161,7 @@ private:
   void deepremvsong(uint32_t songid); // Removes all records of Ups for this sond
   
   // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
-  void updateartist(name up_sender, vector<string> artist_info, string artist_name, string googleid); //CHECK changing
+  void updateartist(name up_sender, vector<string> artist_info, string artist_name, string googleid); //W changing
   
   
   // CHECK - Is this instantiation innefficient? Better in actual actions? 
@@ -181,7 +177,7 @@ public:
   void sol_catch( const name from, const name to, const asset quantity, const std::string memo );
   
   [[eosio::action]]
-  void payup(void); // Default call by AUTH_ACCOUNTS
+  void payup(void); // Default call
   
   [[eosio::action]]
   void payup(name up_sender); // User's call to pay themselves
