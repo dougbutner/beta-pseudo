@@ -160,8 +160,9 @@ private:
   void removesong(uint32_t songid); // Removes all IOUs for song + song record (minimal)
   void deepremvsong(uint32_t songid); // Removes all records of Ups for this sond
   
-  // --- Only AUTH_ACCOUNTS can update Googleid (Salted hash) --- \\ 
-  void updateartist(name up_sender, vector<string> artist_info, string artist_name, string googleid); //W changing
+  // --- All info in *_info Artist info has removed Google rec for security --- \\ 
+  void updateartist(name artist_wax, vector<string> artist_info, string artist_alias); 
+  void updateartistgroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights);
   
   
   // CHECK - Is this instantiation innefficient? Better in actual actions? 

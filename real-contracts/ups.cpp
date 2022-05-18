@@ -76,7 +76,7 @@ void ups::payup(name up_sender) {
 }
 
 // --- Register artist, or change artist information --- \\
-void ups::updateartist(name up_sender, vector<string> artist_info, string artist_name) {
+void ups::updateartist(name artist_wax, vector<string> artist_info, string artist_alias) {
   // IF (exists |artists => account|)
   // UPDATE |artists => artist_info|
   // else 
@@ -84,7 +84,7 @@ void ups::updateartist(name up_sender, vector<string> artist_info, string artist
 }
 
 // --- Register artist group, or change group information --- \\
-void ups::updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info) {
+void ups::updategroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights) {
   // CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
 
   // IF (exists |artistgroup => internal_name|) // Check member list 
