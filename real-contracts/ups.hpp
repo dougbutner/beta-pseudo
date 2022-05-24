@@ -15,36 +15,30 @@ public:
 
 #include "songs.hpp"
 
-private:
-  
-  struct song {
-    string title;
-    vector<string> links;
-    vector<double> geoloc; // CHECK this is a real 
-    uint8_t genre;
-    uint8_t mood;
-    uint8_t format;
-    string atomictempid;
-  };
+struct song {
+  string title;
+  vector<string> links;
+  vector<double> geoloc; // CHECK this is a real 
+  uint8_t genre;
+  uint8_t mood;
+  uint8_t format;
+  string atomictempid;
+};
 
+// --- Bring in song, genres, moods, formats --- \\ 
+uint32_t timeunit;
 
+// Artist Types: { 1: solo, 2: group}
 
-  
-  // --- Bring in song, genres, moods, formats --- \\
-  
-  uint32_t timeunit;
-  
-  // Artist Types: { 1: solo, 2: group}
-  
-  std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
-  
-  enum up_type: uint8_t {
-    SOL = 1,
-    BLUX = 2,
-    BIG = 3
-  };
-  
-  
+std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
+
+enum up_type: uint8_t {
+  SOL = 1,
+  BLUX = 2,
+  BIG = 3
+};
+
+private:  
   TABLE upslog {
     uint64_t upid;
     uint32_t songid;
@@ -75,6 +69,21 @@ private:
     uint64_t primary_key() const { return songid; }
   };
   
+  typedef multi_index<name("totals"), totals> totals_table;
+  
+  // --- Connects cXc.world's DB to chain with songid, maintains NFT list for other dapps --- \\
+  TABLE songs { //CHECK need to store the type of account here?
+    uint32_t songid;
+    name recipient;
+    uint64_t template_id; // CHECK WARN Considering options and waiting on Emanate
+    
+    uint64_t primary_key() const { return (uint64_t) songid; }
+    // Waiting on Emanate to see if we'll use something to connect them
+  };
+  
+  typedef multi_index<name("songs"), songs > songs_table;
+  
+  // --- Activity stats for Listeners (For future awards) --- \\
   TABLE listeners {
     name up_sender;
     uint32_t first_vote;
@@ -85,7 +94,10 @@ private:
     
     uint64_t primary_key() const { return up_sender.value; }
   };
+    typedef multi_index<name("listeners"), listeners> listeners_table;
   
+  // --- Store record of who to pay --- \\ 
+   
   TABLE ious {
     uint64_t iouid;
     name sending_account;
@@ -109,17 +121,9 @@ private:
     eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>
   > ious_table;
   
-  TABLE songs {
-    uint32_t songid;
-    name recipient;
-    uint64_t template_id; // CHECK WARN Considering options and waiting on Emanate
-    
-    uint64_t primary_key() const { return songid; }
-    // Waiting on Emanate to see if we'll use something to connect them
-  };
+
   
-  typedef multi_index<name("songs"), songs> songs_table;
-  
+  // --- Keep record of Artists (recipient in _songs) to pay --- \\
   TABLE artists {
     name artist_account;
     string artist_alias;
@@ -127,6 +131,7 @@ private:
     
     uint64_t primary_key() const { return artist_account.value; }
   };
+  typedef multi_index<name("artists"), artists> artists_table;
   
   TABLE artistgroups {
     string groupname;
@@ -139,6 +144,10 @@ private:
     
     uint64_t primary_key() const { return internal_name.value; }
   };
+  
+    typedef multi_index<name("artistgroups"), artistgroups> groups_table;
+  
+  
   
   TABLE internallog {
     uint32_t last_pay;
@@ -168,6 +177,10 @@ private:
   ious_table _ious;
   upslog_table _upslog;
   songs_table _songs;
+  listeners_table _listeners;
+  artists_table _artists;
+  groups_table _groups;
+  
   
 
   

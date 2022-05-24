@@ -1,28 +1,47 @@
+/*/ -- In case you need an inline action -- \\
+action(
+  permission_level{get_self(), name("active")}, // CHECK why active? Is this bad?
+  get_self(),
+  name("lognewtempl"),
+  make_tuple(
+      template_id,
+      authorized_creator,
+      collection_name,
+      schema_name,
+      transferable,
+      burnable,
+      max_supply,
+      immutable_data
+  )
+).send();
+SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
+/*/
+
 
 /*/
-void updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
-void logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
-void removeups(name user); 
-void updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender); 
-void updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
-void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
-void updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender);
-void removelisten(name up_sender);
-void removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
+ACTION updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
+ACTION logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
+ACTION removeups(name user); 
+ACTION updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender); 
+ACTION updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
+ACTION removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
+ACTION updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender);
+ACTION removelisten(name up_sender);
+ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
 /*/
 
 
 // --- Store persistent record of UP in |ups| --- \\
-void ups::logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
+ACTION ups::logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
   // IF (record exists for TU)
     // UPDATE |ups| where TU = TU & account = account
-    // else
+    // --- else
     // INSERT record of Up into |ups|
     
 }
 
 // --- Will remove blacklisted user's ups retroactively --- \\
-void ups::removeups(name user) {
+ACTION ups::removeups(name user) {
   // IF caller == account
     // DELETE record from |ups| where (account == account )
     // UPDATE record from |totals|
@@ -31,7 +50,17 @@ void ups::removeups(name user) {
 }
 
 // --- Single-row record of ups for each song --- \\
-void ups::updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender) {
+ACTION ups::updatetotal(uint32_t &ups_count, uint8_t ups_type, name &up_sender, uint32_t &songid) {
+  
+  // --- Check if record in TOTAL exists --- \\
+  // --- Instantiate Table --- \\
+  _songs(_self, _self.value);
+  
+  // --- Check for record in TOTALS --- \\ 
+  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
+
+  
+  
   // if (record exists in |totals|)
     // UPDATE record from |totals|
     // else 
@@ -41,7 +70,7 @@ void ups::updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent,
 }
 
 // --- Makes sure people get paid --- \\
-void ups::updateiou(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender, bool subtract) {
+ACTION ups::updateiou(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender, bool subtract) {
   //NOTE all PURPLE IOUs are now stored on a Charts contract
   // if (record exists in |ious|)
     // UPDATE record from |ious|
@@ -51,7 +80,7 @@ void ups::updateiou(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, n
 }
 
 // --- All IOUS are removed from table once paid --- \\
-void ups::removeiou(name sender, name receiver) {
+ACTION ups::removeiou(name sender, name receiver) {
   // if (receiver = dummy_value && sender = dummy_value)
     // return (failed) 
   // if (receiver = dummy_value)
@@ -64,49 +93,27 @@ void ups::removeiou(name sender, name receiver) {
 }
 
 // --- Keep track of total account amounts for ALL users --- \\
-void ups::updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender) {
+ACTION ups::updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // UPDATE record from |listeners|  
   
 }
 
 // --- Remove record of user in event of blacklisting --- \\
-void ups::removelisten(name up_sender) {
+ACTION ups::removelisten(name up_sender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // DELETE record from |listeners|  
   
 }
 
 // --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
-void ups::updateup(uint32_t &ups_count, uint8_t &ups_type, name &up_sender, uint32_t songid) {
-  // IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
-  // call ACTION updatetotal()
-  //ups::updatetotal(ups_count, ups_type, up_sender, songid);  
-  /*
-  action(
-    permission_level{get_self(), name("active")}, // CHECK why active? Is this bad?
-    get_self(),
-    name("lognewtempl"),
-    make_tuple(
-        template_id,
-        authorized_creator,
-        collection_name,
-        schema_name,
-        transferable,
-        burnable,
-        max_supply,
-        immutable_data
-    )
-).send();
-
-SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
-
-*/
+ACTION ups::updateup(uint32_t &ups_count, uint8_t &ups_type, name &up_sender, uint32_t songid) {  
+  // --- Calls action to update the TOTALS table -- \\
+  ups::updatetotal(ups_count, ups_type, up_sender, songid);  
   
+  // --- Log the ups in UPSLOG table --- \\ 
+  ups::logup(ups_count, ups_type, up_sender, songid);
   
-  // call ACTION logup()
-  //ups::logup(ups_count, ups_type, up_sender, songid);
-  
-  // call ACTION updateiou()
-  //ups::updateiou(ups_count, ups_type, up_sender, songid, 0);
+  // --- Record the Up to be paid via IOUS table --- \\
+  ups::updateiou(ups_count, ups_type, up_sender, songid, 0);
 }
