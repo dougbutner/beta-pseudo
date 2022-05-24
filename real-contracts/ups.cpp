@@ -6,8 +6,8 @@
 /*/
 void payup(void); // Default call 
 void payup(name up_sender); // User's call to pay themselves
-void updateartist(name up_sender, vector<string> artist_info, string artist_name);
-void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+void updateartist(name artist_account, vector<string> artist_info, string artist_alias);
+void updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
 void updatesong(uint32_t songid, vector<string>);
 void removesong(uint32_t songid)
 void deepremvsong(uint32_t songid)
@@ -72,9 +72,10 @@ void ups::payup(name up_sender) {
 }
 
 // --- Register artist, or change artist information --- \\
-void ups::updateartist(name artist_wax, vector<string> artist_info, string artist_alias) {
+void ups::updateartist(name artist_account, vector<string> artist_info, string artist_alias) {
   // IF (exists |artists => account|)
   // UPDATE |artists => artist_info|
+  // Check if there is a change to 
   // else 
   // INSERT record into |artists| return;
 }
@@ -92,7 +93,7 @@ void ups::updategroup(name internal_name,  vector<string> group_info, string gro
 
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
-void ups::updatesong(uint32_t songid, ) {
+void ups::updatesong(uint32_t songid, name artist_account) { 
   // NOTE : Music 
   // NOTE: Remove the '-' from genres coming from cXc.world, use enum
   // CHECK (sender = artist || sender = AUTH_ACCOUNT)

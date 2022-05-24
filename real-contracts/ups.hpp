@@ -122,7 +122,7 @@ private:
   
   TABLE artists {
     name artist_account;
-    string artist_name;
+    string artist_alias;
     vector<string> artist_info;
     
     uint64_t primary_key() const { return artist_account.value; }
@@ -130,9 +130,9 @@ private:
   
   TABLE artistgroups {
     string groupname;
-    name internal_name; // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
+    name internal_name; // abcdef.cxc // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
     vector<name> artists;
-    vector<string> artist_names;
+    vector<string> artist_aliass;
     vector<int8_t> weights;
     vector<string> artist_info; // CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs
     uint8_t pay_position;  
@@ -183,10 +183,10 @@ public:
   void payup(name up_sender); // User's call to pay themselves
   
   [[eosio::action]]
-  void updateartist(name up_sender, vector<string> artist_info, string artist_name);
+  void updateartist(name up_sender, vector<string> artist_info, string artist_alias);
   
   [[eosio::action]]
-  void updategroup(name internal_name, string group_name, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+  void updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
   
   [[eosio::action]]
   void updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
