@@ -81,11 +81,32 @@ void ups::removelisten(name up_sender) {
 void ups::updateup(uint32_t &ups_count, uint8_t &ups_type, name &up_sender, uint32_t songid) {
   // IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
   // call ACTION updatetotal()
-  updatetotal(ups_count, ups_type, up_sender, songid);  
+  //ups::updatetotal(ups_count, ups_type, up_sender, songid);  
+  /*
+  action(
+    permission_level{get_self(), name("active")}, // CHECK why active? Is this bad?
+    get_self(),
+    name("lognewtempl"),
+    make_tuple(
+        template_id,
+        authorized_creator,
+        collection_name,
+        schema_name,
+        transferable,
+        burnable,
+        max_supply,
+        immutable_data
+    )
+).send();
+
+SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
+
+*/
+  
   
   // call ACTION logup()
-  logup(ups_count, ups_type, up_sender, songid);
+  //ups::logup(ups_count, ups_type, up_sender, songid);
   
   // call ACTION updateiou()
-  updateiou(ups_count, ups_type, up_sender, songid, 0);
+  //ups::updateiou(ups_count, ups_type, up_sender, songid, 0);
 }

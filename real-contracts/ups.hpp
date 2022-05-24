@@ -173,21 +173,16 @@ private:
   
 public:
   
-  [[eosio::on_notify("sol.cxc::transfer")]] // Listens for any token transfer
+  [[eosio::on_notify("sol.cxc::transfer")]] // CHECK REQUIRES correct contract for SOL/BLUX Listens for any token transfer
   void sol_catch( const name from, const name to, const asset quantity, const std::string memo );
   
-  [[eosio::action]]
-  void payup(void); // Default call
+  ACTION payup(void); // Default call
   
-  [[eosio::action]]
-  void payup(name up_sender); // User's call to pay themselves
+  ACTION payup(name up_sender); // User's call to pay themselves
   
-  [[eosio::action]]
-  void updateartist(name up_sender, vector<string> artist_info, string artist_alias);
+  ACTION updateartist(name up_sender, vector<string> artist_info, string artist_alias);
   
-  [[eosio::action]]
-  void updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+  ACTION updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
   
-  [[eosio::action]]
-  void updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
+  ACTION updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
 };

@@ -4,13 +4,13 @@
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
 /*/
-void payup(void); // Default call 
-void payup(name up_sender); // User's call to pay themselves
-void updateartist(name artist_account, vector<string> artist_info, string artist_alias);
-void updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
-void updatesong(uint32_t songid, vector<string>);
-void removesong(uint32_t songid)
-void deepremvsong(uint32_t songid)
+ACTION payup(void); // Default call 
+ACTION payup(name up_sender); // User's call to pay themselves
+ACTION updateartist(name artist_account, vector<string> artist_info, string artist_alias);
+ACTION updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+ACTION updatesong(uint32_t songid, vector<string>);
+ACTION removesong(uint32_t songid)
+ACTION deepremvsong(uint32_t songid)
 /*/
 
 // --- Receive tokens sent to contract + make ups --- \\
@@ -41,7 +41,7 @@ void deepremvsong(uint32_t songid)
 }
 
 // --- Send all owed payments listed in |ious|  --- \\
-void ups::payup(void) {
+ACTION ups::payup(void) {
   // if (account = undefined) account = all_accounts
   // check the time to ensure it's been 5 minutes
   // READ the |ious.cxc => ious| table for account
@@ -64,7 +64,7 @@ void ups::payup(void) {
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
-void ups::payup(name up_sender) {
+ACTION ups::payup(name up_sender) {
 // Same as above but with account
   //require_auth(username);
 
@@ -72,7 +72,7 @@ void ups::payup(name up_sender) {
 }
 
 // --- Register artist, or change artist information --- \\
-void ups::updateartist(name artist_account, vector<string> artist_info, string artist_alias) {
+ACTION ups::updateartist(name artist_account, vector<string> artist_info, string artist_alias) {
   // IF (exists |artists => account|)
   // UPDATE |artists => artist_info|
   // Check if there is a change to 
@@ -81,7 +81,7 @@ void ups::updateartist(name artist_account, vector<string> artist_info, string a
 }
 
 // --- Register artist group, or change group information --- \\
-void ups::updategroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights) {
+ACTION ups::updategroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights) {
   // CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
 
   // IF (exists |artistgroup => internal_name|) // Check member list 
@@ -93,7 +93,7 @@ void ups::updategroup(name internal_name,  vector<string> group_info, string gro
 
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
-void ups::updatesong(uint32_t songid, name artist_account) { 
+ACTION ups::updatesong(uint32_t songid, name artist_account) { 
   // NOTE : Music 
   // NOTE: Remove the '-' from genres coming from cXc.world, use enum
   // CHECK (sender = artist || sender = AUTH_ACCOUNT)
@@ -106,11 +106,11 @@ void ups::updatesong(uint32_t songid, name artist_account) {
 
 
 // --- Remove the song from earning potential --- \\
-void ups::removesong(uint32_t songid) {
+ACTION ups::removesong(uint32_t songid) {
 
 }
 
 // --- Remove all record of song in RAM --- \\
-void ups::deepremvsong(uint32_t songid) {
+ACTION ups::deepremvsong(uint32_t songid) {
 
 }
