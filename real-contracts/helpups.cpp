@@ -78,7 +78,7 @@ void ups::removelisten(name up_sender) {
 }
 
 // --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
-void ups::updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
+void ups::updateup(uint32_t &ups_count, uint8_t &ups_type, name &up_sender, uint32_t songid) {
   // IF (method == ui (0)) check (sender == AUTH_ACCOUNTs) ELSE method = contract (1)
   // call ACTION updatetotal()
   updatetotal(ups_count, ups_type, up_sender, songid);  

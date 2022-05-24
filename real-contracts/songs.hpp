@@ -69,7 +69,6 @@ enum mood: uint8_t {
 };
 
 enum format: uint8_t {
-  //NONE = 0,
   NFT = 1,
   MUSICVIDEO = 2,
   SONG = 3,

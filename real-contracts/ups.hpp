@@ -121,12 +121,11 @@ private:
   typedef multi_index<name("songs"), songs> songs_table;
   
   TABLE artists {
-    name up_sender;
-    string googleid; // CHECK this needs to be NON-plaintext (hash based on account + timestamp salt )
+    name artist_account;
     string artist_name;
     vector<string> artist_info;
     
-    uint64_t primary_key() const { return up_sender.value; }
+    uint64_t primary_key() const { return artist_account.value; }
   };
   
   TABLE artistgroups {
@@ -146,7 +145,7 @@ private:
     uint32_t last_full_pay; 
     bool remaining; // Did we reach the end of who is owed to pay? 
     
-    uint64_t primary_key() const { return (uint64_t) last_pay; } //CHECK if this is valid +  
+    uint64_t primary_key() const { return (uint64_t) last_pay; } //CHECK if this is singleton
   };
   
   void updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 

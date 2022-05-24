@@ -1,6 +1,5 @@
-#include "helpups.cpp"
 #include "ups.hpp"
-
+#include "helpups.cpp"
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
@@ -15,7 +14,6 @@ void deepremvsong(uint32_t songid)
 /*/
 
 // --- Receive tokens sent to contract + make ups --- \\
-
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {  
   uint32_t songid_upped;
@@ -38,7 +36,7 @@ void deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 1, song_iter, up_sender.value); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
+  ups::updateup(quantity, 1, song_iter, up_sender); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
   
 }
 
@@ -46,8 +44,6 @@ void deepremvsong(uint32_t songid)
 void ups::payup(void) {
   // if (account = undefined) account = all_accounts
   // check the time to ensure it's been 5 minutes
-
-
   // READ the |ious.cxc => ious| table for account
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   
@@ -95,11 +91,10 @@ void ups::updategroup(name internal_name,  vector<string> group_info, string gro
 }
 
 
-
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
-void ups::updatesong(uint32_t songid, vector<string>) {
+void ups::updatesong(uint32_t songid, ) {
   // NOTE : Music 
-  // NOTE: MUST remove the '-' from genres coming from cXc.world
+  // NOTE: Remove the '-' from genres coming from cXc.world, use enum
   // CHECK (sender = artist || sender = AUTH_ACCOUNT)
     // if (group) CHECK (sender is in |artistgroups|)
   // IF (exists |so => account|)
