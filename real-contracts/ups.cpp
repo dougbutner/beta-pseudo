@@ -5,9 +5,9 @@
 
 /*/
 ACTION payup(void); // Default call 
-ACTION payup(name up_sender); // User's call to pay themselves
-ACTION updateartist(name artist_account, vector<string> artist_info, string artist_alias);
-ACTION updategroup(name internal_name, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> group_info);
+ACTION payup(name upsender); // User's call to pay themselves
+ACTION updateartist(name artistacc, vector<string> artistinfo, string artistalias);
+ACTION updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo);
 ACTION updatesong(uint32_t songid, vector<string>);
 ACTION removesong(uint32_t songid)
 ACTION deepremvsong(uint32_t songid)
@@ -36,8 +36,7 @@ ACTION deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
   
   // --- Pass on to updateup() --- \\
-  ups::updateup(quantity, 1, song_iter, up_sender); // 1=SOL Ups (uint32_t quantity, uint8_t ups_type, uint32_t songid, name up_sender)
-  
+  ups::updateup(quantity, 1, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)  
 }
 
 // --- Send all owed payments listed in |ious|  --- \\
@@ -54,7 +53,7 @@ ACTION ups::payup(void) {
     
 
   // if (account is group)
-    // READ |artistgroups => pay_position|
+    // READ |artistgroups => payposition|
     // Compile [] of the members owed by counting off each position and weight until all reward is given out
     
   // TRANSFER the total sum owed to account[s]
@@ -64,7 +63,7 @@ ACTION ups::payup(void) {
 }
 
 // --- Send owed payments listed in |ious| for one account --- \\
-ACTION ups::payup(name up_sender) {
+ACTION ups::payup(name upsender) {
 // Same as above but with account
   //require_auth(username);
 
@@ -72,28 +71,28 @@ ACTION ups::payup(name up_sender) {
 }
 
 // --- Register artist, or change artist information --- \\
-ACTION ups::updateartist(name artist_account, vector<string> artist_info, string artist_alias) {
+ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artistalias) {
   // IF (exists |artists => account|)
-  // UPDATE |artists => artist_info|
+  // UPDATE |artists => artistinfo|
   // Check if there is a change to 
   // else 
   // INSERT record into |artists| return;
 }
 
 // --- Register artist group, or change group information --- \\
-ACTION ups::updategroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights) {
+ACTION ups::updategroup(name intgroupname,  vector<string> groupinfo, string group_alias, vector<string> artists, vector<int8_t> weights) {
   // CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
 
-  // IF (exists |artistgroup => internal_name|) // Check member list 
+  // IF (exists |artistgroup => intgroupname|) // Check member list 
     // CHECK (exists |artistgroup => artists => account|)
-    // UPDATE |artistgroups => artist_info|)
+    // UPDATE |artistgroups => artistinfo|)
   // else 
   // INSERT |artistgroups|
 }
 
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
-ACTION ups::updatesong(uint32_t songid, name artist_account) { 
+ACTION ups::updatesong(uint32_t songid, name artistacc) { 
   // NOTE : Music 
   // NOTE: Remove the '-' from genres coming from cXc.world, use enum
   // CHECK (sender = artist || sender = AUTH_ACCOUNT)

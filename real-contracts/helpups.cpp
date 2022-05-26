@@ -4,7 +4,7 @@ action(
   get_self(),
   name("lognewtempl"),
   make_tuple(
-      template_id,
+      aatemplateid,
       authorized_creator,
       collection_name,
       schema_name,
@@ -19,20 +19,45 @@ SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quan
 
 
 /*/
-ACTION updateup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
-ACTION logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid); 
+ACTION updateup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
+ACTION logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
 ACTION removeups(name user); 
-ACTION updatetotal(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender); 
-ACTION updateiou(name sender, name receiver, uint32_t amount, bool subtract); 
+ACTION updatetotal(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender); 
+ACTION updateiou(name sender, name receiver, uint32_t amount, uint32_t songid, bool subtract); 
 ACTION removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
-ACTION updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender);
-ACTION removelisten(name up_sender);
+ACTION updatelisten(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender);
+ACTION removelisten(name upsender);
 ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
 /*/
 
+// === Helper functions === \\
+// --- Upsert _listeners and _totals --- \\
+void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
+  require_auth( upsender );
+  _totals(get_self(), songid;
+  auto total_iterator = _totals.find(upsender.value);
+  if( iterator == _totals.end() )
+  {
+    _totals.emplace(upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.upscount = upscount;
+      row.updated = eosio::time_point_sec::sec_since_epoch() ;
+    });
+  } 
+  else 
+  {
+    _totals.modify(iterator, upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.upscount += upscount;
+      row.updated = eosio::time_point_sec::sec_since_epoch() ;
+    });
+  }//END if(results)
+}
 
 // --- Store persistent record of UP in |ups| --- \\
-ACTION ups::logup(uint32_t ups_count, uint8_t ups_type, name up_sender, uint32_t songid) {
+ACTION ups::logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid) {
   // IF (record exists for TU)
     // UPDATE |ups| where TU = TU & account = account
     // --- else
@@ -50,14 +75,16 @@ ACTION ups::removeups(name user) {
 }
 
 // --- Single-row record of ups for each song --- \\
-ACTION ups::updatetotal(uint32_t &ups_count, uint8_t ups_type, name &up_sender, uint32_t &songid) {
+ACTION ups::updatetotal(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
+  
+  uint32_t songid_upped = songid;
+  
   
   // --- Check if record in TOTAL exists --- \\
   // --- Instantiate Table --- \\
-  _songs(_self, _self.value);
+  _totals(_self, _self.value);
   
-  // --- Check for record in TOTALS --- \\ 
-  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
+  // --- Upsert record in TOTALS --- \\ 
 
   
   
@@ -70,7 +97,7 @@ ACTION ups::updatetotal(uint32_t &ups_count, uint8_t ups_type, name &up_sender, 
 }
 
 // --- Makes sure people get paid --- \\
-ACTION ups::updateiou(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender, bool subtract) {
+ACTION ups::updateiou(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool subtract) {
   //NOTE all PURPLE IOUs are now stored on a Charts contract
   // if (record exists in |ious|)
     // UPDATE record from |ious|
@@ -93,27 +120,28 @@ ACTION ups::removeiou(name sender, name receiver) {
 }
 
 // --- Keep track of total account amounts for ALL users --- \\
-ACTION ups::updatelisten(uint32_t ups_count, uint8_t ups_type, uint8_t method_sent, name up_sender) {
+ACTION ups::updatelisten(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // UPDATE record from |listeners|  
   
 }
 
 // --- Remove record of user in event of blacklisting --- \\
-ACTION ups::removelisten(name up_sender) {
+ACTION ups::removelisten(name upsender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // DELETE record from |listeners|  
   
 }
 
 // --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
-ACTION ups::updateup(uint32_t &ups_count, uint8_t &ups_type, name &up_sender, uint32_t songid) {  
+ACTION ups::updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
   // --- Calls action to update the TOTALS table -- \\
-  ups::updatetotal(ups_count, ups_type, up_sender, songid);  
+  ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
+  
   
   // --- Log the ups in UPSLOG table --- \\ 
-  ups::logup(ups_count, ups_type, up_sender, songid);
+  ups::logup(upscount, upstype, upsender, songid);
   
   // --- Record the Up to be paid via IOUS table --- \\
-  ups::updateiou(ups_count, ups_type, up_sender, songid, 0);
+  ups::updateiou(upscount, upstype, upsender, songid, 0);
 }
