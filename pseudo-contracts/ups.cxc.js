@@ -1,6 +1,8 @@
 // === Ups Contract === \\
 // Takes all Ups, Pays artists, Maintains song and artist association + Band member lists
 
+// NOTE: This pseudocode is no longer being updated to reflect actual development, please see the real-contracts folder to see the laest changes to structure and functionality
+
 
 ups.cxc { 
   LISTEN => transfer (SOL, BLUX)
