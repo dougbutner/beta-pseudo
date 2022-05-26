@@ -53,12 +53,12 @@ private:
     uint64_t by_tuid() const { return (uint64_t)tuid; }
   };
   
-  typedef multi_index<name("upslog"), upslog,
+  using upslog_table = multi_index<name("upslog"), upslog,
     eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_songid>>,
     eosio::indexed_by<"byupstype"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_type>>,
     eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_ups_count>>,
     eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
-  > upslog_table;
+  >;
   
   TABLE totals {
     uint32_t songid;
@@ -69,7 +69,7 @@ private:
     uint64_t primary_key() const { return songid; }
   };
   
-  typedef multi_index<name("totals"), totals> totals_table;
+  using totals_table = multi_index<name("totals"), totals>;
   
   // --- Connects cXc.world's DB to chain with songid, maintains NFT list for other dapps --- \\
   TABLE songs { //CHECK need to store the type of account here?
@@ -81,7 +81,7 @@ private:
     // Waiting on Emanate to see if we'll use something to connect them
   };
   
-  typedef multi_index<name("songs"), songs > songs_table;
+  using songs_table = multi_index<name("songs"), songs >;
   
   // --- Activity stats for Listeners (For future awards) --- \\
   TABLE listeners {
@@ -94,10 +94,9 @@ private:
     
     uint64_t primary_key() const { return up_sender.value; }
   };
-    typedef multi_index<name("listeners"), listeners> listeners_table;
+    using listeners_table = multi_index<name("listeners"), listeners>;
   
   // --- Store record of who to pay --- \\ 
-   
   TABLE ious {
     uint64_t iouid;
     name sending_account;
@@ -114,12 +113,12 @@ private:
     uint64_t by_initiated() const { return (uint64_t) initiated; }
   };
   
-  typedef multi_index<name("ious"), ious,
+  using ious_table = multi_index<name("ious"), ious,
     eosio::indexed_by<"byrecacc"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_receiving_account>>,
     eosio::indexed_by<"byrecacctype"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_receiving_account_type>>,
     eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_ups_count>>,
     eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>
-  > ious_table;
+  >;
   
 
   
@@ -131,7 +130,7 @@ private:
     
     uint64_t primary_key() const { return artist_account.value; }
   };
-  typedef multi_index<name("artists"), artists> artists_table;
+  using artists_table = multi_index<name("artists"), artists>;
   
   TABLE artistgroups {
     string groupname;
@@ -145,7 +144,7 @@ private:
     uint64_t primary_key() const { return internal_name.value; }
   };
   
-    typedef multi_index<name("artistgroups"), artistgroups> groups_table;
+    using groups_table = multi_index<name("artistgroups"), artistgroups>;
   
   
   
@@ -173,13 +172,15 @@ private:
   void updateartistgroup(name internal_name,  vector<string> group_info, string group_alias, vector<string> artists, vector<int8_t> weights);
   
   
-  // CHECK - Is this instantiation innefficient? Better in actual actions? 
+  // --- Declare the _tables for later use --- \\ 
   ious_table _ious;
   upslog_table _upslog;
   songs_table _songs;
   listeners_table _listeners;
   artists_table _artists;
   groups_table _groups;
+  totals_table _totals;
+  
   
   
 
