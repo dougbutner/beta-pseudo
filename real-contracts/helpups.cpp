@@ -1,3 +1,12 @@
+/*/
+WORKING ISSUES 
+
+We may need to remove all the extranious updaters to move to a standard function. 
+- Avoids spinning up a new environment to execute 
+
+/*/
+
+
 /*/ -- In case you need an inline action -- \\
 action(
   permission_level{get_self(), name("active")}, // CHECK why active? Is this bad?
@@ -34,15 +43,36 @@ ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs 
 // --- Upsert _listeners and _totals --- \\
 void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
   require_auth( upsender );
+  // --- Assert the type of ups --- \\
+  
+  up_type type_of_up = upstype;
+  
+  if (upstype == SOL)
+  {
+    
+  } else if (upstype == BLUX)
+  {
+    
+  } else if (upstype == BIG)
+  {
+    
+  } else if (upstype == BIGSOL)
+  {
+    
+  }
+  
+  
+  // --- Update _totals record of cumulative song Ups --- \\
   _totals(get_self(), songid;
-  auto total_iterator = _totals.find(upsender.value);
+  auto total_iterator = _totals.find(songid);
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   if( iterator == _totals.end() )
   {
     _totals.emplace(upsender, [&]( auto& row ) {
       row.key = songid;
       row.upstype = upstype;
       row.upscount = upscount;
-      row.updated = eosio::time_point_sec::sec_since_epoch() ;
+      row.updated = time_of_up;
     });
   } 
   else 
@@ -51,9 +81,34 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
       row.key = songid;
       row.upstype = upstype;
       row.upscount += upscount;
-      row.updated = eosio::time_point_sec::sec_since_epoch() ;
+      row.updated = time_of_up;
     });
-  }//END if(results)
+  }//END if(results _totals)
+  
+  // --- Update _listeners record --- \\
+  _totals(get_self(), songid;
+  auto total_iterator = _totals.find(songid);
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
+  if( iterator == _totals.end() )
+  {
+    _totals.emplace(upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.upscount = upscount;
+      row.updated = time_of_up;
+    });
+  } 
+  else 
+  {
+    _totals.modify(iterator, upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.upscount += upscount;
+      row.updated = time_of_up;
+    });
+  }//END if(results _totals)
+  
+  
 }
 
 // --- Store persistent record of UP in |ups| --- \\
@@ -76,24 +131,18 @@ ACTION ups::removeups(name user) {
 
 // --- Single-row record of ups for each song --- \\
 ACTION ups::updatetotal(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
-  
   uint32_t songid_upped = songid;
-  
-  
   // --- Check if record in TOTAL exists --- \\
   // --- Instantiate Table --- \\
   _totals(_self, _self.value);
   
   // --- Upsert record in TOTALS --- \\ 
 
-  
-  
   // if (record exists in |totals|)
     // UPDATE record from |totals|
     // else 
     // INSERT record into |totals|  
   // CONTRACT soldisk.cxc is notified and calls LISTEN => ups.cxc:updatetotal()
-  
 }
 
 // --- Makes sure people get paid --- \\

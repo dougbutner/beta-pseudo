@@ -1,6 +1,6 @@
 // --- Songs Helper Contract for ups.cxc --- \\
 
-enum genre: uint8_t {
+enum genre : uint8_t {
   NONE = 0, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
   CONSCIOUS = 1,
   TRANCE = 2,
@@ -43,7 +43,7 @@ enum genre: uint8_t {
   COUNTRY = 39
 };
 
-enum mood: uint8_t {
+enum mood : uint8_t {
   //NONE = 0,// NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word
   CHILL = 1,
   SPIRITUAL = 2,
@@ -68,7 +68,7 @@ enum mood: uint8_t {
   ROMANTIC = 21,
 };
 
-enum format: uint8_t {
+enum format : uint8_t {
   NFT = 1,
   MUSICVIDEO = 2,
   SONG = 3,

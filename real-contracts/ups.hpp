@@ -32,14 +32,16 @@ uint32_t timeunit;
 
 std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
 
-enum up_type: uint8_t {
+enum up_type {
   SOL = 1,
   BLUX = 2,
-  BIG = 3
+  BIG = 3,
+  SOLBIG = 4 // -- This allows one call to send both Sol and Big Ups, greedy for all 64 Ups to make one Big Up (Won't work otherwise) 
+  // -- 
 };
 
 private:  
-  TABLE upslog {
+  TABLE upslog { 
     uint64_t upid;
     uint32_t songid;
     uint8_t upstype;
