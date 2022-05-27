@@ -47,69 +47,81 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   
   up_type type_of_up = upstype;
   
-  if (upstype == SOL)
-  {
-    
-  } else if (upstype == BLUX)
-  {
-    
-  } else if (upstype == BIG)
-  {
-    
+  uint32_t newsolups = 0; 
+  uint32_t newbluups = 0;
+  uint32_t newbigups = 0;
+  
+  if (upstype == SOL){
+    newsolups = upscount; 
+  } else if (upstype == BLUX){
+    newbluups = upscount;
+  } else if (upstype == BIG){
+    newbigups = upscount;
   } else if (upstype == BIGSOL)
   {
-    
-  }
-  
+    if (upscount < 64){// Only send Ups  
+      newsolups = upscount; 
+    } else {
+      newsolups = upscount; 
+      newbigups = floor(upscount / 64); 
+    }
+  }//END Ups Type Section
   
   // --- Update _totals record of cumulative song Ups --- \\
-  _totals(get_self(), songid;
+  _totals(get_self(), songid);
   auto total_iterator = _totals.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   if( iterator == _totals.end() )
-  {
+  { // -- Make New Record
     _totals.emplace(upsender, [&]( auto& row ) {
       row.key = songid;
       row.upstype = upstype;
-      row.upscount = upscount;
+      row.totalsolups = newsolups;
+      row.totalbluups = newbluups;
+      row.totalbigups = newbigups;
       row.updated = time_of_up;
     });
   } 
   else 
-  {
+  { // -- Update Record
     _totals.modify(iterator, upsender, [&]( auto& row ) {
       row.key = songid;
       row.upstype = upstype;
-      row.upscount += upscount;
+      row.totalsolups += newsolups;
+      row.totalbluups += newbluups;
+      row.totalbigups += newbigups;
       row.updated = time_of_up;
     });
   }//END if(results _totals)
-  
+
   // --- Update _listeners record --- \\
-  _totals(get_self(), songid;
-  auto total_iterator = _totals.find(songid);
+  _listeners(get_self(), songid);
+  auto total_iterator = _listeners.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  if( iterator == _totals.end() )
+  if( iterator == _listeners.end() )
   {
-    _totals.emplace(upsender, [&]( auto& row ) {
-      row.key = songid;
-      row.upstype = upstype;
-      row.upscount = upscount;
-      row.updated = time_of_up;
+    _listeners.emplace(upsender, [&]( auto& row ) {
+      row.key = upsender;
+      row.firstup = time_of_up;
+      row.lastup = time_of_up;
+      row.totalsolups = newsolups;
+      row.totalbluups = newbluups;
+      row.totalbigups = newbigups;
     });
   } 
   else 
   {
-    _totals.modify(iterator, upsender, [&]( auto& row ) {
-      row.key = songid;
-      row.upstype = upstype;
-      row.upscount += upscount;
-      row.updated = time_of_up;
+    _listeners.modify(iterator, upsender, [&]( auto& row ) {
+      row.key = upsender;
+      row.firstup = upstype;
+      row.lastup = time_of_up;
+      row.totalsolups += newsolups;
+      row.totalbluups += newbluups;
+      row.totalbigups += newbigups;
     });
-  }//END if(results _totals)
-  
-  
+  }//END if(results _listeners)
 }
+
 
 // --- Store persistent record of UP in |ups| --- \\
 ACTION ups::logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid) {
@@ -126,7 +138,6 @@ ACTION ups::removeups(name user) {
     // DELETE record from |ups| where (account == account )
     // UPDATE record from |totals|
     // call updatetotal()
-    
 }
 
 // --- Single-row record of ups for each song --- \\
@@ -186,7 +197,7 @@ ACTION ups::removelisten(name upsender) {
 ACTION ups::updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
   // --- Calls action to update the TOTALS table -- \\
   ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
-  
+  // CHANGE upsert_total()
   
   // --- Log the ups in UPSLOG table --- \\ 
   ups::logup(upscount, upstype, upsender, songid);

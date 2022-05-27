@@ -10,7 +10,7 @@ using std::string;
 
 class [[eosio::contract]] ups : public contract {
   
-  using contract::contract;
+using contract::contract;
 public: 
 
 #include "songs.hpp"
@@ -85,7 +85,7 @@ private:
     // Waiting on Emanate to see if we'll use something to connect them
   };
   
-  using songs_table = multi_index<name("songs"), songs >;
+  using songs_table = multi_index<name("songs"), songs>;
   
   // --- Activity stats for Listeners (For future awards) --- \\
   TABLE listeners {
@@ -98,6 +98,7 @@ private:
     
     uint64_t primary_key() const { return upsender.value; }
   };
+  
     using listeners_table = multi_index<name("listeners"), listeners>;
   
   // --- Store record of who to pay --- \\ 
