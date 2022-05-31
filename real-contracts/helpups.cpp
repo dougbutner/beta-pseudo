@@ -40,11 +40,58 @@ ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs 
 /*/
 
 // === Helper functions === \\
+
+// --- Returns the current Time Unit --- \\
+uint32_t find_tu(uint32_t &momento){
+  // 1561139700 is the first Time Unit
+  uint32_t time_unit = floor((momento - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
+  return time_unit;
+}
+
+// --- Returns the current Time Unit --- \\
+uint32_t find_tu(void){
+  uint32_t momento = eosio::time_point_sec::sec_since_epoch();
+  uint32_t time_unit = floor((momento - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
+  return time_unit;
+}
+
+// --- Update running log of --- \\
+void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid){
+  require_auth( upsender );
+  uint32_t momento = find_tu();
+  
+  // --- Add record to _upslog --- \\
+  _totals(get_self(), songid);
+  auto total_iterator = _totals.find(songid);
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
+  if( iterator == _totals.end() )
+  { // -- Make New Record
+    _totals.emplace(upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.totalsolups = newsolups;
+      row.totalbluups = newbluups;
+      row.totalbigups = newbigups;
+      row.updated = time_of_up;
+    });
+  } 
+  else 
+  { // -- Update Record
+    _totals.modify(iterator, upsender, [&]( auto& row ) {
+      row.key = songid;
+      row.upstype = upstype;
+      row.totalsolups += newsolups;
+      row.totalbluups += newbluups;
+      row.totalbigups += newbigups;
+      row.updated = time_of_up;
+    });
+  }//END if(results _totals)
+}
+
 // --- Upsert _listeners and _totals --- \\
 void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
   require_auth( upsender );
   // --- Assert the type of ups --- \\
-  
   up_type type_of_up = upstype;
   
   uint32_t newsolups = 0; 
@@ -121,6 +168,8 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
     });
   }//END if(results _listeners)
 }
+
+
 
 
 // --- Store persistent record of UP in |ups| --- \\
