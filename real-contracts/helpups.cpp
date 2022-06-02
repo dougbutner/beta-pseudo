@@ -24,6 +24,9 @@ action(
   )
 ).send();
 SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
+
+// --- I always forget this shit --- \\
+multi_index_example( name receiver, name code, datastream<const char*> ds )
 /*/
 
 
@@ -42,87 +45,69 @@ ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs 
 // === Helper functions === \\
 
 // --- Returns the current Time Unit --- \\
-uint32_t find_tu(uint32_t &momento){
+uint32_t find_tu(uint32_t &momentuin){
   // 1561139700 is the first Time Unit
-  uint32_t time_unit = floor((momento - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
+  uint32_t time_unit = floor((momentuin - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
   return time_unit;
 }
 
 // --- Returns the current Time Unit --- \\
 uint32_t find_tu(void){
-  uint32_t momento = eosio::time_point_sec::sec_since_epoch();
-  uint32_t time_unit = floor((momento - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
+  uint32_t momentuin = eosio::time_point_sec::sec_since_epoch();
+  uint32_t time_unit = floor((momentuin - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
   return time_unit;
 }
 
-// --- Update running log of --- \\
+// === Upserterterses === \\
+// --- Update running log of ups --- \\
 void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid){
   require_auth( upsender );
-  uint32_t momento = find_tu();
+  uint32_t momentu = find_tu();
+  
+  // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ 
+#include "upsifter.cpp"
   
   // --- Add record to _upslog --- \\
-  _totals(get_self(), songid);
-  auto total_iterator = _totals.find(songid);
+  _upslog(get_self(), songid); //WARN - is songid right here? URGENT I really think this is wrong for all upserts
+  auto upslog_iterator = _upslog.find(upid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  if( iterator == _totals.end() )
+  if( upslog_iterator == _upslog.end() )
   { // -- Make New Record
-    _totals.emplace(upsender, [&]( auto& row ) {
+    _upslog.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
       row.key = songid;
-      row.upstype = upstype;
       row.totalsolups = newsolups;
       row.totalbluups = newbluups;
       row.totalbigups = newbigups;
-      row.updated = time_of_up;
+      row.tuid = momentu;
     });
   } 
   else 
   { // -- Update Record
-    _totals.modify(iterator, upsender, [&]( auto& row ) {
+    _upslog.modify(upslog_iterator, upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
       row.key = songid;
-      row.upstype = upstype;
       row.totalsolups += newsolups;
       row.totalbluups += newbluups;
       row.totalbigups += newbigups;
-      row.updated = time_of_up;
+      //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
     });
-  }//END if(results _totals)
+  }//END if(results _upslog) 
 }
 
 // --- Upsert _listeners and _totals --- \\
 void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
   require_auth( upsender );
-  // --- Assert the type of ups --- \\
-  up_type type_of_up = upstype;
-  
-  uint32_t newsolups = 0; 
-  uint32_t newbluups = 0;
-  uint32_t newbigups = 0;
-  
-  if (upstype == SOL){
-    newsolups = upscount; 
-  } else if (upstype == BLUX){
-    newbluups = upscount;
-  } else if (upstype == BIG){
-    newbigups = upscount;
-  } else if (upstype == BIGSOL)
-  {
-    if (upscount < 64){// Only send Ups  
-      newsolups = upscount; 
-    } else {
-      newsolups = upscount; 
-      newbigups = floor(upscount / 64); 
-    }
-  }//END Ups Type Section
+
+  // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\
+#include "upsifter.cpp"
   
   // --- Update _totals record of cumulative song Ups --- \\
   _totals(get_self(), songid);
   auto total_iterator = _totals.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  if( iterator == _totals.end() )
+  if( total_iterator == _totals.end() )
   { // -- Make New Record
     _totals.emplace(upsender, [&]( auto& row ) {
       row.key = songid;
-      row.upstype = upstype;
       row.totalsolups = newsolups;
       row.totalbluups = newbluups;
       row.totalbigups = newbigups;
@@ -131,9 +116,8 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   } 
   else 
   { // -- Update Record
-    _totals.modify(iterator, upsender, [&]( auto& row ) {
+    _totals.modify(total_iterator, upsender, [&]( auto& row ) {
       row.key = songid;
-      row.upstype = upstype;
       row.totalsolups += newsolups;
       row.totalbluups += newbluups;
       row.totalbigups += newbigups;
@@ -143,9 +127,9 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
 
   // --- Update _listeners record --- \\
   _listeners(get_self(), songid);
-  auto total_iterator = _listeners.find(songid);
+  auto listener_iterator = _listeners.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  if( iterator == _listeners.end() )
+  if( listener_iterator == _listeners.end() )
   {
     _listeners.emplace(upsender, [&]( auto& row ) {
       row.key = upsender;
@@ -158,7 +142,7 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   } 
   else 
   {
-    _listeners.modify(iterator, upsender, [&]( auto& row ) {
+    _listeners.modify(listener_iterator, upsender, [&]( auto& row ) {
       row.key = upsender;
       row.firstup = upstype;
       row.lastup = time_of_up;
@@ -169,17 +153,45 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   }//END if(results _listeners)
 }
 
-
-
-
-// --- Store persistent record of UP in |ups| --- \\
-ACTION ups::logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid) {
-  // IF (record exists for TU)
-    // UPDATE |ups| where TU = TU & account = account
-    // --- else
-    // INSERT record of Up into |ups|
-    
-}
+// --- Upsert IOUs --- \\
+void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t songid, bool subtract){
+  require_auth( upsender );
+  
+  // --- Determine artist type by songid --- \\
+  //TODO read songs table for ingo
+  
+  // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
+#include "upsifter.cpp"
+  
+  // --- Add record to _upslog --- \\
+  _ious(get_self(), upsender);
+  auto ious_iterator = _ious.find(iouid);
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
+  
+  //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
+  if( ious_iterator == _upslog.end() )
+  { // -- Make New Record
+    _upslog.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+      row.key = _upslog.end(); //URGENT check this
+      row.upsender = upsender;
+      row.upcatcher = upcatcher;
+      row.artisttype = artisttype;
+      row.upscount = upscount;
+      row.upstype = upstype;
+      row.initialized = time_of_up;
+      row.updated = time_of_up;
+    });
+  } 
+  else 
+  { // -- Update Record
+    _upslog.modify(ious_iterator, upsender, [&]( auto& row ) {
+      row.upscount += upscount;
+      row.upstype = upstype;//WARN - Solve problem of big ups. Only problem if we decide to further reward withing the system
+      row.updated = time_of_up;
+      //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
+    });
+  }//END if(results _upslog)
+}//END upsert_ious()
 
 // --- Will remove blacklisted user's ups retroactively --- \\
 ACTION ups::removeups(name user) {
@@ -189,21 +201,6 @@ ACTION ups::removeups(name user) {
     // call updatetotal()
 }
 
-// --- Single-row record of ups for each song --- \\
-ACTION ups::updatetotal(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
-  uint32_t songid_upped = songid;
-  // --- Check if record in TOTAL exists --- \\
-  // --- Instantiate Table --- \\
-  _totals(_self, _self.value);
-  
-  // --- Upsert record in TOTALS --- \\ 
-
-  // if (record exists in |totals|)
-    // UPDATE record from |totals|
-    // else 
-    // INSERT record into |totals|  
-  // CONTRACT soldisk.cxc is notified and calls LISTEN => ups.cxc:updatetotal()
-}
 
 // --- Makes sure people get paid --- \\
 ACTION ups::updateiou(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool subtract) {
@@ -232,25 +229,25 @@ ACTION ups::removeiou(name sender, name receiver) {
 ACTION ups::updatelisten(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // UPDATE record from |listeners|  
-  
 }
 
 // --- Remove record of user in event of blacklisting --- \\
 ACTION ups::removelisten(name upsender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // DELETE record from |listeners|  
-  
 }
 
 // --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
 ACTION ups::updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
   // --- Calls action to update the TOTALS table -- \\
-  ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
-  // CHANGE upsert_total()
+  //ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
+  upsert_total(upscount, upstype, upsender, songid);
   
   // --- Log the ups in UPSLOG table --- \\ 
-  ups::logup(upscount, upstype, upsender, songid);
+  //ups::logup(upscount, upstype, upsender, songid);
+  upsert_logup(upscount, upstype, upsender, songid);
   
   // --- Record the Up to be paid via IOUS table --- \\
-  ups::updateiou(upscount, upstype, upsender, songid, 0);
+  //ups::updateiou(upscount, upstype, upsender, songid, 0);
+  upsert_iou(upscount, upstype, upsender, songid, 0);
 }
