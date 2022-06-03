@@ -36,7 +36,7 @@ enum up_type { //CHECK is this really just making vars across the system (needed
   SOL = 1,
   BLUX = 2,
   BIG = 3,
-  SOLBIG = 4 // -- This allows one call to send both Sol and Big Ups, greedy for all 64 Ups to make one Big Up (Won't work otherwise) 
+  BIGSOL = 4 // -- This allows one call to send both Sol and Big Ups, greedy for all 64 Ups to make one Big Up (Won't work otherwise) 
   // -- 
 };
 
