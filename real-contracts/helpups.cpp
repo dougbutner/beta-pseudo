@@ -68,7 +68,7 @@ void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t so
 #include "upsifter.cpp"
   
   // --- Add record to _upslog --- \\
-  _upslog(get_self(), songid); //WARN - is songid right here? URGENT I really think this is wrong for all upserts
+  _upslog(get_self(), songid); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
   auto upslog_iterator = _upslog.find(upid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   if( upslog_iterator == _upslog.end() )
@@ -151,14 +151,20 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
       row.totalbigups += newbigups;
     });
   }//END if(results _listeners)
-}
+}//END upsert_total()
 
 // --- Upsert IOUs --- \\
 void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t songid, bool subtract){
   require_auth( upsender );
   
   // --- Determine artist type by songid --- \\
-  //TODO read songs table for ingo
+  //TODO read songs table for info
+  
+  _songs(get_self(), songid); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
+  auto songs_iterator = _songs.find(songid);
+  check(songs_iterator != _songs.end(), "No song exists with this ID"); 
+  
+  
   
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
 #include "upsifter.cpp"
@@ -168,23 +174,31 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   auto ious_iterator = _ious.find(iouid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   
+  
+  
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
-  if( ious_iterator == _upslog.end() )
+  if( ious_iterator == _upslog.end())
   { // -- Make New Record
-    _upslog.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+    _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
       row.key = _upslog.end(); //URGENT check this
       row.upsender = upsender;
       row.upcatcher = upcatcher;
       row.artisttype = artisttype;
-      row.upscount = upscount;
-      row.upstype = upstype;
+      row.upscount = newsolups;
+      row.upstype = SOL;
       row.initialized = time_of_up;
       row.updated = time_of_up;
     });
+    // --- Big Up IOUs --- \\
+    if(newbigups > 0){
+      
+      
+    }
+    
   } 
   else 
   { // -- Update Record
-    _upslog.modify(ious_iterator, upsender, [&]( auto& row ) {
+    _ious.modify(ious_iterator, upsender, [&]( auto& row ) {
       row.upscount += upscount;
       row.upstype = upstype;//WARN - Solve problem of big ups. Only problem if we decide to further reward withing the system
       row.updated = time_of_up;

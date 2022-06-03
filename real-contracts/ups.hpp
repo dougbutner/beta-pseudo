@@ -18,7 +18,7 @@ public:
 struct song {
   string title;
   vector<string> links;
-  vector<double> geoloc; // CHECK this is a real 
+  vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
   uint8_t genre;
   uint8_t mood;
   uint8_t format;
@@ -104,6 +104,8 @@ private:
   TABLE songs { //CHECK need to store the type of account here?
     uint32_t songid;
     name recipient;
+    
+    song cancion;
     uint64_t aatemplateid; // CHECK WARN Considering options and waiting on Emanate
     
     uint64_t primary_key() const { return (uint64_t) songid; }
