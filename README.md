@@ -54,6 +54,15 @@ up_type { // ENUM uint8_t
 > Please note - Function names and variable names change slightly from psuedo-code to real code to account for character limits and conventions.
 
 
+## Informal record of progress
+- Completed .hpp file with initial structure 
+- Added skeleton of ups.hpp
+- Moved some functionality (mainly non-public functions) to helpups.cpp
+- Moved updating ACTIONS to 'upsert_' functions  
+- Added upsifter to abstract common functionality to upsifter.hpp
+- Completed all updateup() upsert functions (pending testing)
+
+
 ## Differences from Purple Explainer
 We have had to make some changes for performance. Here's how it will work now.
 
