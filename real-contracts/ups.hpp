@@ -17,7 +17,7 @@ public:
 
 struct song {
   string title;
-  vector<string> links;
+  vector<string> links; //CHECK this concept, look how others do it, Atomic, etc
   vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
   uint8_t genre;
   uint8_t mood;
@@ -103,10 +103,10 @@ private:
   // --- Connects cXc.world's DB to chain with songid, maintains NFT list for other dapps --- \\
   TABLE songs { //CHECK need to store the type of account here?
     uint32_t songid;
-    name recipient;
-    
-    song cancion;
-    uint64_t aatemplateid; // CHECK WARN Considering options and waiting on Emanate
+    name artistacc;
+    uint8_t artisttype;
+    song song;
+    //uint64_t aatemplateid; // removed becaise it is in the song struct
     
     uint64_t primary_key() const { return (uint64_t) songid; }
     // Waiting on Emanate to see if we'll use something to connect them

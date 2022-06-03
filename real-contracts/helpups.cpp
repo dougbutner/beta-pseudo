@@ -157,53 +157,74 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
 void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t songid, bool subtract){
   require_auth( upsender );
   
-  // --- Determine artist type by songid --- \\
-  //TODO read songs table for info
-  
-  _songs(get_self(), songid); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
+  // --- Determine Artist + Artist Type --- \\
+  _songs(get_self(), _self); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
   auto songs_iterator = _songs.find(songid);
   check(songs_iterator != _songs.end(), "No song exists with this ID"); 
-  
-  
-  
+  name artistacc = songs_iterator->artistacc;
+  name artisttype = songs_iterator->artisttype;
+
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
 #include "upsifter.cpp"
   
   // --- Add record to _upslog --- \\
   _ious(get_self(), upsender);
-  auto ious_iterator = _ious.find(iouid);
+  
+  /*/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  Where does the iouid come from?? Need to figure out how to query using the Songid and the Tuid at the same time 
+  iouid should be compsed of these two values
+  Remember conversation in TG where was told we can simply combine these 
+  Bitshift two 32ts into a 64t or else use 128t
+  /*/
+  auto ious_iterator = _ious.find(iouid); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  
-  
-  
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
   if( ious_iterator == _upslog.end())
   { // -- Make New Record
     _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
       row.key = _upslog.end(); //URGENT check this
       row.upsender = upsender;
-      row.upcatcher = upcatcher;
+      row.upcatcher = artistacc;
       row.artisttype = artisttype;
       row.upscount = newsolups;
       row.upstype = SOL;
       row.initialized = time_of_up;
       row.updated = time_of_up;
     });
-    // --- Big Up IOUs --- \\
+    // --- Insert Big Up IOUs --- \\ This is new concept needed to reward Big Ups in a special way, intended to not get convoluted
     if(newbigups > 0){
-      
-      
-    }
-    
+      _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+        row.key = _upslog.end(); //URGENT check this
+        row.upsender = upsender;
+        row.upcatcher = artistacc;
+        row.artisttype = artisttype;
+        row.upscount = newbigups;
+        row.upstype = BIG;
+        row.initialized = time_of_up;
+        row.updated = time_of_up;
+      });
+    }//END if(newbigups)
   } 
   else 
   { // -- Update Record
     _ious.modify(ious_iterator, upsender, [&]( auto& row ) {
       row.upscount += upscount;
-      row.upstype = upstype;//WARN - Solve problem of big ups. Only problem if we decide to further reward withing the system
+      //row.upstype = upstype;//Should not change, now we use different type
       row.updated = time_of_up;
       //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
     });
+    // --- Update Big Up IOUs --- \\ 
+    if(newbigups > 0){
+      _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+        row.key = _upslog.end(); //URGENT check this
+        row.upsender = upsender;
+        row.upcatcher = artistacc;
+        row.artisttype = artisttype;
+        row.upscount += newbigups;
+        row.upstype = BIG;
+        row.updated = time_of_up;
+      });
+    }//END if(newbigups)
   }//END if(results _upslog)
 }//END upsert_ious()
 
