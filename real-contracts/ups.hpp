@@ -32,7 +32,7 @@ uint32_t timeunit;
 
 std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" }; // CHECK these are right
 
-enum up_type {
+enum up_type { //CHECK is this really just making vars across the system (needed)
   SOL = 1,
   BLUX = 2,
   BIG = 3,
