@@ -171,18 +171,20 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   _ious(get_self(), upsender);
   
   /*/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Where does the iouid come from?? Need to figure out how to query using the Songid and the Tuid at the same time 
-  iouid should be compsed of these two values
+  Where does the iouid come from?? 
+  iouid should be compsed of Songid and Tuid values
   Remember conversation in TG where was told we can simply combine these 
   Bitshift two 32ts into a 64t or else use 128t
   /*/
+  
+  
   auto ious_iterator = _ious.find(iouid); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
   if( ious_iterator == _upslog.end())
   { // -- Make New Record
     _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
-      row.key = _upslog.end(); //URGENT check this
+      row.key = _upslog.end(); //URGENT check this CHANGE to bit shifted combnation of values 
       row.upsender = upsender;
       row.upcatcher = artistacc;
       row.artisttype = artisttype;
