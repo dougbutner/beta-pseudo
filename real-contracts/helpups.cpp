@@ -161,8 +161,12 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   _songs(get_self(), _self); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
   auto songs_iterator = _songs.find(songid);
   check(songs_iterator != _songs.end(), "No song exists with this ID"); 
-  name artistacc = songs_iterator->artistacc;
+  name artistacc = songs_iterator->artistacc;//CHECK does this need to be .value()?
   name artisttype = songs_iterator->artisttype;
+  
+  // --- Create the shifted iouid value --- \\
+  uint32_t momentu = find_tu();
+  uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
 
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
 #include "upsifter.cpp"
@@ -175,6 +179,13 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   iouid should be compsed of Songid and Tuid values
   Remember conversation in TG where was told we can simply combine these 
   Bitshift two 32ts into a 64t or else use 128t
+  
+  Typecast both 32 into 64
+  Bitshift the tuid value to the right -> 
+  Use & (and) op to combine the two calues into one uint64
+  
+  uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
+  
   /*/
   
   
@@ -183,17 +194,17 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
   if( ious_iterator == _upslog.end())
   { // -- Make New Record
-    _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
-      row.key = _upslog.end(); //URGENT check this CHANGE to bit shifted combnation of values 
+    _ious.emplace(upsender, [&]( auto& row ) {
+      row.key = iouid; 
       row.upsender = upsender;
       row.upcatcher = artistacc;
       row.artisttype = artisttype;
       row.upscount = newsolups;
-      row.upstype = SOL;
+      row.upstype = upstype; // This should be SOL (1 or BIGDO)
       row.initialized = time_of_up;
       row.updated = time_of_up;
     });
-    // --- Insert Big Up IOUs --- \\ This is new concept needed to reward Big Ups in a special way, intended to not get convoluted
+    /*/ --- Insert Big Up IOUs --- \\ REMOVED AS PK IS NO LONGER UNIQUE, use BIGSOL type to determine This is new concept needed to reward Big Ups in a special way, intended to not get convoluted
     if(newbigups > 0){
       _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
         row.key = _upslog.end(); //URGENT check this
@@ -206,6 +217,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
         row.updated = time_of_up;
       });
     }//END if(newbigups)
+    /*/
   } 
   else 
   { // -- Update Record
@@ -215,18 +227,6 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
       row.updated = time_of_up;
       //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
     });
-    // --- Update Big Up IOUs --- \\ 
-    if(newbigups > 0){
-      _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
-        row.key = _upslog.end(); //URGENT check this
-        row.upsender = upsender;
-        row.upcatcher = artistacc;
-        row.artisttype = artisttype;
-        row.upscount += newbigups;
-        row.upstype = BIG;
-        row.updated = time_of_up;
-      });
-    }//END if(newbigups)
   }//END if(results _upslog)
 }//END upsert_ious()
 
