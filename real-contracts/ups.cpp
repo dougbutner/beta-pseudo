@@ -38,20 +38,56 @@ ACTION deepremvsong(uint32_t songid)
   // --- Pass on to updateup() --- \\
   ups::updateup(quantity, 1, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
-}
+}//END listen->SOL ups 
+
+//NOTE need separate LISTENER for Bluups
 
 // --- Send all owed payments listed in |ious|  --- \\
 ACTION ups::payup(void) {
-  // if (account = undefined) account = all_accounts
   // check the time to ensure it's been 5 minutes
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   // READ the |ious.cxc => ious| table for account
+  _ious(get_self(), upsender);
+  //auto ious_iterator = _ious.find(iouid); 
+  auto ious_iterator = _ious.get_index("initiated"_n)
+  for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
+   /*/ itr->secondary
+     uint64_t ious_iterator->iouid;
+     name ious_iterator->upsender;
+     name ious_iterator->upcatcher;
+     uint8_t ious_iterator->artisttype;
+     uint32_t ious_iterator->upscount // Should be either BIGSOL or sol up or both
+     uint8_t ious_iterator->upstype
+     uint32_t ious_iterator->initiated;
+     uint32_t ious_iterator->updated; 
+   /*/
+   
+   // --- Check Time for min 5 minutes since last payment --- \\
+   //MUST Declare bluxbluxblux::transfer
+   
+   bluxbluxblux::count_action count("abcounter"_n, {get_self(), "active"_n});
+    count.send(user, type);
+   
+   // Switch on upstype REMOVE 
+   if (ious_iterator->upstype ==  BIGSOL){
+     
+     // --- How many Big Ups --- \\
+     auto big_ups_count = floor(ious_iterator->upscount / 64);
+     
+     // --- Mint NFTs for Big Ups --- \\
+     
+     
+   }
+ }//END for (12)
+
+
+  
+  
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   
   //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
   
-    // Make [] with each record of owed to depth of 12 rows, starting with oldest
-    
-    
+  // Make [] with each record of owed to depth of 12 rows, starting with oldest
 
   // if (account is group)
     // READ |artistgroups => payposition|
@@ -61,15 +97,14 @@ ACTION ups::payup(void) {
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
 
 
-}
+}//END payup(void)
 
 // --- Send owed payments listed in |ious| for one account --- \\
 ACTION ups::payup(name upsender) {
 // Same as above but with account
   //require_auth(username);
 
-
-}
+}//END payup(void)
 
 // --- Register artist, or change artist information --- \\
 ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artistalias) {

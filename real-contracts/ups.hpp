@@ -37,7 +37,6 @@ enum up_type { //CHECK is this really just making vars across the system (needed
   BLUX = 2,
   BIG = 3,
   BIGSOL = 4 // -- This allows one call to send both Sol and Big Ups, greedy for all 64 Ups to make one Big Up (Won't work otherwise) 
-  // -- 
 };
 
 private:  
@@ -135,7 +134,7 @@ private:
     name upsender;
     name upcatcher;
     uint8_t artisttype;
-    uint32_t upscount; // Should be either big up or sol up or both
+    uint32_t upscount; // Should be either BIGSOL or sol up or both
     uint8_t upstype;
     uint32_t initiated;
     uint32_t updated; 

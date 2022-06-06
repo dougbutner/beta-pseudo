@@ -171,24 +171,14 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
 #include "upsifter.cpp"
   
-  // --- Add record to _upslog --- \\
-  _ious(get_self(), upsender);
-  
-  /*/!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  Where does the iouid come from?? 
-  iouid should be compsed of Songid and Tuid values
-  Remember conversation in TG where was told we can simply combine these 
-  Bitshift two 32ts into a 64t or else use 128t
-  
-  Typecast both 32 into 64
-  Bitshift the tuid value to the right -> 
-  Use & (and) op to combine the two calues into one uint64
-  
-  uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
-  
+  /*/ --- iouid explanation -- \\
+    Where does the iouid come from?? 
+    iouid is a bit-combo of Songid and Tuid 
+    uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
   /*/
   
-  
+  // --- Add record to _upslog --- \\
+  _ious(get_self(), upsender); //WARN this should probably be a contract scope
   auto ious_iterator = _ious.find(iouid); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
@@ -259,7 +249,6 @@ ACTION ups::removeiou(name sender, name receiver) {
   // DELETE all record from |ious| where reciever = reciever
   // else 
   // DELETE records from |ious| where reciever = reciever && sender = sender 
-  
 }
 
 // --- Keep track of total account amounts for ALL users --- \\
@@ -277,14 +266,14 @@ ACTION ups::removelisten(name upsender) {
 // --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
 ACTION ups::updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
   // --- Calls action to update the TOTALS table -- \\
-  //ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
+  //DEP ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
   upsert_total(upscount, upstype, upsender, songid);
   
   // --- Log the ups in UPSLOG table --- \\ 
-  //ups::logup(upscount, upstype, upsender, songid);
+  //DEP ups::logup(upscount, upstype, upsender, songid);
   upsert_logup(upscount, upstype, upsender, songid);
   
   // --- Record the Up to be paid via IOUS table --- \\
-  //ups::updateiou(upscount, upstype, upsender, songid, 0);
+  //DEP ups::updateiou(upscount, upstype, upsender, songid, 0);
   upsert_iou(upscount, upstype, upsender, songid, 0);
 }
