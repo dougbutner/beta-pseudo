@@ -1,3 +1,4 @@
+#include "bluxbluxblux.cpp"
 /*/
 WORKING ISSUES 
 
@@ -57,6 +58,30 @@ uint32_t find_tu(void){
   uint32_t time_unit = floor((momentuin - 1561139700) / 300);  // Divide by the length of a Time Unit in seconds
   return time_unit;
 }
+
+// === Pay + Mint NFTs === \\ 
+// --- Pay BLUX to the SOL recipients --- \\
+//CHECK set permission eosio.code on the BLUX contract
+void send_blux( const name&    from,
+                const name&    to,
+                const asset&   quantity,
+                const string&  memo)
+{
+  // --- Check that this contract is the caller  --- \\
+  require_auth(get_self());
+  //require_recipient(to);
+  if (to != get_self() || from == get_self() || quantity::amount < 0)//CHECK last quantity::amount is correct
+  {
+      return;
+  }
+  
+  action(
+      permission_level{ get_self(),"active"_n },
+      get_self,
+      "transfer"_n,
+      std::make_tuple(get_self(), from, to, quantity, memo)
+  ).send();
+}//END send_blux()
 
 // === Upserterterses === \\
 // --- Update running log of ups --- \\

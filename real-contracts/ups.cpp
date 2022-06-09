@@ -46,8 +46,11 @@ ACTION deepremvsong(uint32_t songid)
 ACTION ups::payup(void) {
   // check the time to ensure it's been 5 minutes
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
+  _internallog(get_self(), get_self().value);
+  check(nftToTokenTable.get().primary_key() < (time_of_up + 3), "Please wait 5 seconds between each payup. ");//CHECK this syntax is correct
+  
   // READ the |ious.cxc => ious| table for account
-  _ious(get_self(), upsender);
+  _ious(get_self(), upsender.value);//CHECK scope
   //auto ious_iterator = _ious.find(iouid); 
   auto ious_iterator = _ious.get_index("initiated"_n)
   for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
@@ -63,17 +66,13 @@ ACTION ups::payup(void) {
    /*/
    
    // --- Check Time for min 5 minutes since last payment --- \\
-   //MUST Declare bluxbluxblux::transfer (include headers, cpp?)
    
-   bluxbluxblux::transfer transfer("abcounter"_n, {get_self(), "active"_n});
-    count.send(user, type);
+   
    
    if (ious_iterator->upstype ==  BIGSOL){
      // --- How many Big Ups --- \\
      auto big_ups_count = floor(ious_iterator->upscount / 64);
      // --- Mint NFTs for Big Ups --- \\
-     
-     
    }
  }//END for (12)
 
