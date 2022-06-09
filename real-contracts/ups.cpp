@@ -44,7 +44,7 @@ ACTION deepremvsong(uint32_t songid)
 
 // --- Send all owed payments listed in |ious|  --- \\
 ACTION ups::payup(void) {
-  // check the time to ensure it's been 5 minutes
+   // --- Check Time for min 5 minutes since last payment --- \\
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   _internallog(get_self(), get_self().value);
   check(nftToTokenTable.get().primary_key() < (time_of_up + 3), "Please wait 5 seconds between each payup. ");//CHECK this syntax is correct
@@ -65,7 +65,21 @@ ACTION ups::payup(void) {
      uint32_t ious_iterator->updated; 
    /*/
    
-   // --- Check Time for min 5 minutes since last payment --- \\
+   // --- Build Memo --- \\
+   uint32_t songid = iouid_to_songid(ious_iterator->iouid);
+   string memo1("BLUX pay for cxc.world/");
+   string memo2(songid);
+   string memo = memo1 + memo2;
+   
+   if(ious_iterator->artisttype == 1) // 1=solo, 2=group
+   {
+     send_blux(to, to, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+   } else {
+     // --- --- \\
+     //Check if the table is instantiated
+     //Instntiate if it's not
+     
+   }
    
    
    
