@@ -34,7 +34,7 @@ ACTION deepremvsong(uint32_t songid)
 
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
-  
+
   // --- Pass on to updateup() --- \\
   ups::updateup(quantity, 1, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
@@ -63,17 +63,14 @@ ACTION ups::payup(void) {
    /*/
    
    // --- Check Time for min 5 minutes since last payment --- \\
-   //MUST Declare bluxbluxblux::transfer
+   //MUST Declare bluxbluxblux::transfer (include headers, cpp?)
    
-   bluxbluxblux::count_action count("abcounter"_n, {get_self(), "active"_n});
+   bluxbluxblux::transfer transfer("abcounter"_n, {get_self(), "active"_n});
     count.send(user, type);
    
-   // Switch on upstype REMOVE 
    if (ious_iterator->upstype ==  BIGSOL){
-     
      // --- How many Big Ups --- \\
      auto big_ups_count = floor(ious_iterator->upscount / 64);
-     
      // --- Mint NFTs for Big Ups --- \\
      
      
@@ -84,15 +81,11 @@ ACTION ups::payup(void) {
   
   
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
-  
   //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
-  
   // Make [] with each record of owed to depth of 12 rows, starting with oldest
-
   // if (account is group)
     // READ |artistgroups => payposition|
     // Compile [] of the members owed by counting off each position and weight until all reward is given out
-    
   // TRANSFER the total sum owed to account[s]
   // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
 

@@ -158,7 +158,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   require_auth( upsender );
   
   // --- Determine Artist + Artist Type --- \\
-  _songs(get_self(), _self); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
+  _songs(get_self(), get_self().value); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
   auto songs_iterator = _songs.find(songid);
   check(songs_iterator != _songs.end(), "No song exists with this ID"); 
   name artistacc = songs_iterator->artistacc;//CHECK does this need to be .value()?
@@ -190,30 +190,16 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
       row.upcatcher = artistacc;
       row.artisttype = artisttype;
       row.upscount = newsolups;
-      row.upstype = upstype; // This should be SOL (1 or BIGDO)
+      row.upstype = upstype; // This should be SOL (1 or BIGSOL)
       row.initialized = time_of_up;
       row.updated = time_of_up;
     });
-    /*/ --- Insert Big Up IOUs --- \\ REMOVED AS PK IS NO LONGER UNIQUE, use BIGSOL type to determine This is new concept needed to reward Big Ups in a special way, intended to not get convoluted
-    if(newbigups > 0){
-      _ious.emplace(upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
-        row.key = _upslog.end(); //URGENT check this
-        row.upsender = upsender;
-        row.upcatcher = artistacc;
-        row.artisttype = artisttype;
-        row.upscount = newbigups;
-        row.upstype = BIG;
-        row.initialized = time_of_up;
-        row.updated = time_of_up;
-      });
-    }//END if(newbigups)
-    /*/
   } 
   else 
   { // -- Update Record
     _ious.modify(ious_iterator, upsender, [&]( auto& row ) {
       row.upscount += upscount;
-      //row.upstype = upstype;//Should not change, now we use different type
+      row.upstype = upstype;// Can be from SOL -> BIGSOL
       row.updated = time_of_up;
       //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
     });
