@@ -59,6 +59,20 @@ uint32_t find_tu(void){
   return time_unit;
 }
 
+// --- Get Songid from iouif (concat of tuid + songid) --- \\
+uint32_t iouid_to_songid(uint32_t iouid){
+  uint32_t songid = (uint32_t) iouid;
+  return songid;
+}
+
+// --- Get Tuid from iouif (concat of tuid + songid) --- \\
+uint32_t iouid_to_tuid(uint32_t iouid){
+  uint32_t tuid = (uint32_t iouid>>32);
+  return tuid;
+}
+
+//uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
+
 // === Pay + Mint NFTs === \\ 
 // --- Pay BLUX to the SOL recipients --- \\
 //CHECK set permission eosio.code on the BLUX contract
