@@ -108,17 +108,31 @@ ACTION ups::payup(void) {
      ious_iterator->groupname,
      ious_iterator->artists, 
      ious_iterator->weights
+     ious_iterator->payposition
      /*/
      // --- Get Artists and Weights --- \\
      auto groups_itr = _groups.require_find(ious_iterator->upcatcher); //CHECK that the _require won't cause transactions to fail
      
-     auto remaining_ups = ious_iterator->upscount
+     auto remaining_ups = ious_iterator->upscount;
+     auto current_position = ious_iterator->payposition;
+     auto total_positions =  0;
      
+     // --- Get the total amount of payments --- \\
      for(int itr=0, ious_iterator->upcatcher.size(), itr++){
-       groups_itr->weights
-       groups_itr->artists 
-       
-       
+       total_positions += groups_itr->weights[itr];
+     }
+     
+     // --- Make payments + update table --- \\
+     for(int itr=0, ious_iterator->upcatcher.size(), itr++){
+       if(remaining_ups > 0){
+         
+         if(itr + 1 == ious_iterator->upcatcher.size()){// If it's the last payment
+           // --- Update the database with new Payposition --- \\
+         }
+       } else {// Dammit Charles, why don't you have any money?
+         break;
+       }
+
        
        // --- Send the BLUX --- \\ 
        send_blux(to, ious_iterator->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
@@ -136,7 +150,7 @@ ACTION ups::payup(void) {
      
      
      //Check if the table is instantiated
-     //Instntiate if it's not
+     //Instantiate if it's not
      
    }
   
