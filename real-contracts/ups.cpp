@@ -50,9 +50,36 @@ ACTION ups::payup(void) {
   check(nftToTokenTable.get().primary_key() < (time_of_up + 3), "Please wait 5 seconds between each payup. ");//CHECK this syntax is correct
   
   // READ the |ious.cxc => ious| table for account
-  _ious(get_self(), upsender.value);//CHECK scope
+  _ious(get_self(), upsender.value);//CHECK WARN scope
   //auto ious_iterator = _ious.find(iouid); 
   auto ious_iterator = _ious.get_index("initiated"_n)
+  
+  // --- Check if Groups exist in list to be paid --- \\ CHECK: Remove this from single-payer
+  bool groupies = false;
+  std::vector<name> foundgroups; 
+  struct DemBoiz {
+    name intgroupname,
+    string groupname,
+    vector<int8_t> artists,
+    vector<int8_t> weights
+  };
+  
+  
+  for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK should ious_iterator really be the table?
+    if (uint8_t ious_iterator->artisttype == 2){
+      groupies = true;
+      // Pass Groupname, Artists, weights upcatcher to 
+
+    }
+    //Pay Position is out of cumulative Artists*weight 
+    //Weight is integer between 1-12
+  }
+  
+
+  if (groupies) {// Instantiate the _groups table
+    _groups(get_self(), get_self().value);
+  }
+
   for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
    /*/ itr->secondary
      uint64_t ious_iterator->iouid;
@@ -70,28 +97,55 @@ ACTION ups::payup(void) {
    string memo1("BLUX pay for cxc.world/");
    string memo2(songid);
    string memo = memo1 + memo2;
-   
+
    if(ious_iterator->artisttype == 1) // 1=solo, 2=group
    {
-     send_blux(to, to, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+     send_blux(to, ious_iterator->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
    } else {
-     // --- --- \\
+     // --- Get the information from dagroup --- \\
+     /*/
+     ious_iterator->intgroupname, 
+     ious_iterator->groupname,
+     ious_iterator->artists, 
+     ious_iterator->weights
+     /*/
+     // --- Get Artists and Weights --- \\
+     auto groups_itr = _groups.require_find(ious_iterator->upcatcher); //CHECK that the _require won't cause transactions to fail
+     
+     auto remaining_ups = ious_iterator->upscount
+     
+     for(int itr=0, ious_iterator->upcatcher.size(), itr++){
+       groups_itr->weights
+       groups_itr->artists 
+       
+       
+       
+       // --- Send the BLUX --- \\ 
+       send_blux(to, ious_iterator->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+       
+     }//END for(members)
+     
+
+     // --- Add group's Readable name to the memo --- \\
+     string prememo(ious_iterator->intgroupname);
+     string prememo2(" ");
+     prememo = prememo + prememo2;
+     memo = prememo + memo;
+     
+     // --- Determine each member's pay --- \\
+     
+     
      //Check if the table is instantiated
      //Instntiate if it's not
      
    }
-   
-   
-   
+  
    if (ious_iterator->upstype ==  BIGSOL){
      // --- How many Big Ups --- \\
      auto big_ups_count = floor(ious_iterator->upscount / 64);
      // --- Mint NFTs for Big Ups --- \\
    }
  }//END for (12)
-
-
-  
   
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   //auto& ur_ious = _ious.get(username.value, "User doesn't exist");

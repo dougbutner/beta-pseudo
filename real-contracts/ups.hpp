@@ -64,7 +64,7 @@ private:
     eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
   >;
   
-  /*/
+  /*/ -- 
   TABLE upslog { 
     uint64_t upid;
     uint32_t songid;
@@ -168,7 +168,6 @@ private:
     string groupname;
     name intgroupname; // abcdef.cxc // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
     vector<name> artists;
-    vector<string> groupalias;
     vector<int8_t> weights;
     vector<string> groupinfo; // CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs
     uint8_t payposition;  
