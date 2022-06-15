@@ -49,10 +49,9 @@ ACTION ups::payup(void) {
   _internallog(get_self(), get_self().value);
   check(nftToTokenTable.get().primary_key() < (time_of_up + 3), "Please wait 5 seconds between each payup. ");//CHECK this syntax is correct
   
-  // READ the |ious.cxc => ious| table for account
+  // --- Get oldest IOUs from _ious Table --- \\
   _ious(get_self(), upsender.value);//CHECK WARN scope
-  //auto ious_iterator = _ious.find(iouid); 
-  auto ious_iterator = _ious.get_index("initiated"_n)
+  auto ious_itr = _ious.get_index("initiated"_n)
   
   // --- Check if Groups exist in list to be paid --- \\ CHECK: Remove this from single-payer
   bool groupies = false;
@@ -65,11 +64,10 @@ ACTION ups::payup(void) {
   };
   
   
-  for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK should ious_iterator really be the table?
-    if (uint8_t ious_iterator->artisttype == 2){
+  for ( auto itr = ious_itr.rbegin(); itr >= ious_itr.rbegin() - 12; itr++ ) {//CHECK should ious_itr really be the table?
+    if (uint8_t ious_itr->artisttype == 2){
       groupies = true;
       // Pass Groupname, Artists, weights upcatcher to 
-
     }
     //Pay Position is out of cumulative Artists*weight 
     //Weight is integer between 1-12
@@ -80,68 +78,77 @@ ACTION ups::payup(void) {
     _groups(get_self(), get_self().value);
   }
 
-  for ( auto itr = ious_iterator.rbegin(); itr >= ious_iterator.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
+  for ( auto itr = ious_itr.rbegin(); itr >= ious_itr.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
    /*/ itr->secondary
-     uint64_t ious_iterator->iouid;
-     name ious_iterator->upsender;
-     name ious_iterator->upcatcher;
-     uint8_t ious_iterator->artisttype;
-     uint32_t ious_iterator->upscount // Should be either BIGSOL or sol up or both
-     uint8_t ious_iterator->upstype
-     uint32_t ious_iterator->initiated;
-     uint32_t ious_iterator->updated; 
+     uint64_t ious_itr->iouid;
+     name ious_itr->upsender;
+     name ious_itr->upcatcher;
+     uint8_t ious_itr->artisttype;
+     uint32_t ious_itr->upscount // Should be either BIGSOL or sol up or both
+     uint8_t ious_itr->upstype
+     uint32_t ious_itr->initiated;
+     uint32_t ious_itr->updated; 
    /*/
    
    // --- Build Memo --- \\
-   uint32_t songid = iouid_to_songid(ious_iterator->iouid);
+   uint32_t songid = iouid_to_songid(ious_itr->iouid);
    string memo1("BLUX pay for cxc.world/");
    string memo2(songid);
    string memo = memo1 + memo2;
 
-   if(ious_iterator->artisttype == 1) // 1=solo, 2=group
+   if(ious_itr->artisttype == 1) // 1=solo, 2=group
    {
-     send_blux(to, ious_iterator->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+     send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
    } else {
      // --- Get the information from dagroup --- \\
      /*/
-     ious_iterator->intgroupname, 
-     ious_iterator->groupname,
-     ious_iterator->artists, 
-     ious_iterator->weights
-     ious_iterator->payposition
+     ious_itr->intgroupname, 
+     ious_itr->groupname,
+     ious_itr->artists, 
+     ious_itr->weights
+     ious_itr->payposition
      /*/
      // --- Get Artists and Weights --- \\
-     auto groups_itr = _groups.require_find(ious_iterator->upcatcher); //CHECK that the _require won't cause transactions to fail
+     auto groups_itr = _groups.require_find(ious_itr->upcatcher); //CHECK that the _require won't cause transactions to fail
      
-     auto remaining_ups = ious_iterator->upscount;
-     auto current_position = ious_iterator->payposition;
+     auto remaining_ups = ious_itr->upscount;
+     auto current_position = groups_itr->payposition;
      auto total_positions = 0;
      
      // --- Get the total amount of payments --- \\
-     for(int itr = 0, ious_iterator->upcatcher.size(), itr++){
+     for(int itr = 0, groups_itr->weights.size(), itr++){
        total_positions += groups_itr->weights[itr];
      }
      
      // --- Make payments + update table --- \\
-     for(int itr = 0, ious_iterator->upcatcher.size(), itr++){
+     for(int itr = 0, groups_itr->weights.size(), itr++){
        if(remaining_ups > 0){
+         // --- Determine Max Pay by Weight --- \\ 
+         auto artist_paid = groups_itr->artists[itr];
+
+         auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
          
-         if(itr + 1 == ious_iterator->upcatcher.size()){// If it's the last payment
+         // --- Send Group Member BLUX --- \\ 
+         send_blux(to, roups_itr->artists[itr], real_payment, memo);
+         
+         remaining_ups -= real_payment;
+         
+         if(itr + 1 == groups_itr->weights.size()){// If it's the last payment
            // --- Update the table with new Payposition --- \\
+           //TODO - Make Upsert function for Group info 
          }
        } else {// Dammit Charles, why don't you have any money?
          break;
        }
 
-       
-       // --- Send the BLUX --- \\ 
-       send_blux(to, ious_iterator->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+       // --- Send Solo Artist BLUX --- \\ 
+       send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
        
      }//END for(members)
      
 
      // --- Add group's Readable name to the memo --- \\
-     string prememo(ious_iterator->intgroupname);
+     string prememo(ious_itr->intgroupname);
      string prememo2(" ");
      prememo = prememo + prememo2;
      memo = prememo + memo;
@@ -154,9 +161,9 @@ ACTION ups::payup(void) {
      
    }
   
-   if (ious_iterator->upstype ==  BIGSOL){
+   if (ious_itr->upstype ==  BIGSOL){
      // --- How many Big Ups --- \\
-     auto big_ups_count = floor(ious_iterator->upscount / 64);
+     auto big_ups_count = floor(ious_itr->upscount / 64);
      // --- Mint NFTs for Big Ups --- \\
    }
  }//END for (12)

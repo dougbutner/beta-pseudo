@@ -75,10 +75,24 @@ uint32_t iouid_to_tuid(uint32_t iouid){
 
 // === Pay + Mint NFTs === \\ 
 // --- Pay BLUX to the SOL recipients --- \\
+
+// --- Overload to accept Integer types --- \\
+void send_blux( const name&    from,
+                const name&    to,
+                const uint32_t  quantity, 
+                const string&  memo)
+{
+  
+  string blux_string = "BLUX"
+  symbol blux_symbol = eosio::symbol_code::symbol_code(blux_string);
+  asset blux_asset = eosio::asset::asset( int64_t quantity, class symbol blux_symbol );
+  
+  send_blux(from, to, blux_asset, memo);
+}//END unit-accepting overloaded send_blux()
 //CHECK set permission eosio.code on the BLUX contract
 void send_blux( const name&    from,
                 const name&    to,
-                const asset&   quantity,
+                const asset&   quantity, 
                 const string&  memo)
 {
   // --- Check that this contract is the caller  --- \\
@@ -194,7 +208,7 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
 
 // --- Upsert IOUs --- \\
 void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t songid, bool subtract){
-  require_auth( upsender );
+  require_auth( upsender ); //CHECK if this breaks call from payup for groups
   
   // --- Determine Artist + Artist Type --- \\
   _songs(get_self(), get_self().value); //WARN CHECK - is songid right here? URGENT I really think this is wrong for all upserts
@@ -207,7 +221,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   uint32_t momentu = find_tu();
   uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
 
-  // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know typr in IOUs
+  // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\ WARN may not be needed, we know type in IOUs
 #include "upsifter.cpp"
   
   /*/ --- iouid explanation -- \\
@@ -218,10 +232,10 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   
   // --- Add record to _upslog --- \\
   _ious(get_self(), upsender); //WARN this should probably be a contract scope
-  auto ious_iterator = _ious.find(iouid); 
+  auto ious_itr = _ious.find(iouid); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
-  if( ious_iterator == _upslog.end())
+  if( ious_itr == _upslog.end())
   { // -- Make New Record
     _ious.emplace(upsender, [&]( auto& row ) {
       row.key = iouid; 
@@ -236,7 +250,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   } 
   else 
   { // -- Update Record
-    _ious.modify(ious_iterator, upsender, [&]( auto& row ) {
+    _ious.modify(ious_itr, upsender, [&]( auto& row ) {
       row.upscount += upscount;
       row.upstype = upstype;// Can be from SOL -> BIGSOL
       row.updated = time_of_up;
