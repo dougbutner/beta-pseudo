@@ -115,19 +115,19 @@ ACTION ups::payup(void) {
      
      auto remaining_ups = ious_iterator->upscount;
      auto current_position = ious_iterator->payposition;
-     auto total_positions =  0;
+     auto total_positions = 0;
      
      // --- Get the total amount of payments --- \\
-     for(int itr=0, ious_iterator->upcatcher.size(), itr++){
+     for(int itr = 0, ious_iterator->upcatcher.size(), itr++){
        total_positions += groups_itr->weights[itr];
      }
      
      // --- Make payments + update table --- \\
-     for(int itr=0, ious_iterator->upcatcher.size(), itr++){
+     for(int itr = 0, ious_iterator->upcatcher.size(), itr++){
        if(remaining_ups > 0){
          
          if(itr + 1 == ious_iterator->upcatcher.size()){// If it's the last payment
-           // --- Update the database with new Payposition --- \\
+           // --- Update the table with new Payposition --- \\
          }
        } else {// Dammit Charles, why don't you have any money?
          break;

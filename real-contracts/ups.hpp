@@ -64,29 +64,6 @@ private:
     eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
   >;
   
-  /*/ -- 
-  TABLE upslog { 
-    uint64_t upid;
-    uint32_t songid;
-    uint8_t upstype;
-    uint32_t upscount;
-    uint32_t tuid;
-  
-    uint64_t primary_key() const { return upid; }
-    uint64_t by_songid() const { return (uint64_t) songid; }
-    uint64_t by_upstype() const { return (uint64_t) upstype; }
-    uint64_t by_upscount() const { return (uint64_t) upscount; }
-    uint64_t by_tuid() const { return (uint64_t)tuid; }
-  };
-  
-  using upslog_table = multi_index<name("upslog"), upslog,
-    eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_songid>>,
-    eosio::indexed_by<"byupstype"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_upstype>>,
-    eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_upscount>>,
-    eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
-  >;
-  /*/
-  
   TABLE totals {
     uint32_t songid;
     uint32_t totalsolups; 
