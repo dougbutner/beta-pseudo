@@ -55,7 +55,7 @@ ACTION ups::payup(void) {
   
   // --- Check if Groups exist in list to be paid --- \\ CHECK: Remove this from single-payer
   bool groupies = false;
-  std::vector<name> foundgroups; 
+  std::vector<name> foundgroups; //CHECK are we still using this 
   struct DemBoiz {
     name intgroupname,
     string groupname,
@@ -64,23 +64,22 @@ ACTION ups::payup(void) {
   };
   
   
-  for ( auto itr = ious_itr.rbegin(); itr >= ious_itr.rbegin() - 12; itr++ ) {//CHECK should ious_itr really be the table?
+  for ( auto itr_g_check = ious_itr.rbegin(); itr_g_check >= ious_itr.rbegin() - 12; itr_g_check++ ) {//CHECK should ious_itr really be the table?
     if (uint8_t ious_itr->artisttype == 2){
       groupies = true;
       // Pass Groupname, Artists, weights upcatcher to 
     }
     //Pay Position is out of cumulative Artists*weight 
     //Weight is integer between 1-12
-  }
+  }//END group check
   
 
   if (groupies) {// Instantiate the _groups table
     _groups(get_self(), get_self().value);
   }
   
-  //READ ME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CHANGE itr to be different in each loop!!!!
   
-  for ( auto itr = ious_itr.rbegin(); itr >= ious_itr.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
+  for ( auto itr_12 = ious_itr.rbegin(); itr_12 >= ious_itr.rbegin() - 12; itr_12++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
    /*/ itr->secondary
      uint64_t ious_itr->iouid;
      name ious_itr->upsender;
@@ -115,24 +114,30 @@ ACTION ups::payup(void) {
      
      auto remaining_ups = ious_itr->upscount;
      auto current_position = groups_itr->payposition;
-     auto total_positions = 0;
+     auto total_positions = std::accumulate(groups_itr->weights.begin(), groups_itr->weights.end(), 0)
      
-     // --- Get the total amount of payments --- \\
+     /*/ HERE IN CASE ABOVE FAILS --- Get the total amount of payments --- \\
      for(int itr = 0, groups_itr->weights.size(), itr++){
        total_positions += groups_itr->weights[itr];
-     }
+     }/*/
      
-     // --- Make payments + update table --- \\
-     for(int itr = 0, groups_itr->weights.size(), itr++){
+     // === Make payments + update table === \\
+     // --- Figure out who in group to pay first, then pay the rest --- \\
+     for(int itr_g_members = 0, groups_itr->weights.size(), itr_g_members++){
        if(remaining_ups > 0){
          // --- Tally previous pay positions --- \\
         if (current_position > 1){// If less, No need to check the position
           uint16_t artist_position = 0;
+          uint32_t artist_round_payable = 0;
           auto checked_position = current_position;
           auto to_assign = ious_itr->upscount;
-          for (int itr_artist_position = 0, groups_itr->weights.size(), itr++){
+          
+          for (int itr_artist_position = 0, groups_itr->weights.size(), itr_artist_position++){
             
-          }
+            groups_itr->weights[itr_g_members]
+            groups_itr->artists[itr_g_members]
+            
+          }//END if (position = 1)
         }//END if (current_position > 1)
          
          
@@ -157,9 +162,7 @@ ACTION ups::payup(void) {
 
        // --- Send Solo Artist BLUX --- \\ 
        send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
-       
      }//END for(members)
-     
 
      // --- Add group's Readable name to the memo --- \\
      string prememo(ious_itr->intgroupname);
@@ -180,7 +183,7 @@ ACTION ups::payup(void) {
      auto big_ups_count = floor(ious_itr->upscount / 64);
      // --- Mint NFTs for Big Ups --- \\
    }
- }//END for (12)
+ }//END for (12 IOUs)
   
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
   //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
