@@ -99,22 +99,24 @@ ACTION ups::payup(void) {
 
    if(ious_itr->artisttype == 1) // 1=solo, 2=group
    {
-     send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
+     send_blux(to, ious_itr->upcatcher, quantity, memo);//EXPLAIN To = old from (this contract) WORKING (Add to FRESH)
    } else {
      // --- Get the information from dagroup --- \\
-     /*/
-     ious_itr->intgroupname, 
-     ious_itr->groupname,
-     ious_itr->artists, 
-     ious_itr->weights
-     ious_itr->payposition
-     /*/
+     
+     // --- Add group's Readable name to the memo --- \\
+     string prememo(ious_itr->intgroupname);
+     string prememo2(" ");
+     prememo = prememo + prememo2;
+     memo = prememo + memo;
+     
      // --- Get Artists and Weights --- \\
      auto groups_itr = _groups.require_find(ious_itr->upcatcher); //CHECK that the _require won't cause transactions to fail
      
      auto remaining_ups = ious_itr->upscount;
-     auto current_position = groups_itr->payposition;
-     auto total_positions = std::accumulate(groups_itr->weights.begin(), groups_itr->weights.end(), 0)
+     auto last_position = groups_itr->payposition;
+     auto current_position = 0;
+     auto total_positions = std::accumulate(groups_itr->weights.begin(), groups_itr->weights.end(), 0);
+     bool pay_started = false;
      
      /*/ HERE IN CASE ABOVE FAILS --- Get the total amount of payments --- \\
      for(int itr = 0, groups_itr->weights.size(), itr++){
@@ -123,59 +125,62 @@ ACTION ups::payup(void) {
      
      // === Make payments + update table === \\
      // --- Figure out who in group to pay first, then pay the rest --- \\
+     
      for(int itr_g_members = 0, groups_itr->weights.size(), itr_g_members++){
        if(remaining_ups > 0){
-         // --- Tally previous pay positions --- \\
-        if (current_position > 1){// If less, No need to check the position
-          uint16_t artist_position = 0;
-          uint32_t artist_round_payable = 0;
-          auto checked_position = current_position;
+        // --- Figure out who to pay --- \\
+        uint32_t artist_first_payable_pos = 0;
+         
+        if (last_position > 1 || pay_started == false){
+          // If less, No need to check the position
+          auto checked_position = 0;
           auto to_assign = ious_itr->upscount;
-          
+
           for (int itr_artist_position = 0, groups_itr->weights.size(), itr_artist_position++){
             
-            groups_itr->weights[itr_g_members]
-            groups_itr->artists[itr_g_members]
+            checked_position += groups_itr->weights[itr_g_members];
+            //artist_position = itr_artist_position;
             
-          }//END if (position = 1)
-        }//END if (current_position > 1)
-         
-         
-         // --- Determine Max + Real Pay by Weight --- \\ 
-         auto artist_paid = groups_itr->artists[itr];
-         auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
-         
-         // --- Send Group Member BLUX --- \\ 
-         send_blux(to, groups_itr->artists[itr], real_payment, memo);
-         remaining_ups -= real_payment;
-         
-         //if(itr + 1 == groups_itr->weights.size()){//UGLY, but same, If it's the last payment
-         if(remaining_ups < 1){ // It's the last payment
-         
-           // --- Update the table with new Payposition --- \\
-           //TODO - Make Upsert function for Group info 
-           
-         }
+            if ((checked_position + groups_itr->weights[itr_g_members + 1]) <= remaining_ups){// This is the person to be paid
+              artist_first_payable_pos = itr_artist_position;
+              pay_started = true;
+              break;
+            }//END position check <= remaining_ups
+          }//END for(itr_artist_position)
+          
+          if (pay_started){
+            // --- Loop starting at the artist_first_payable_pos --- \\
+            for(int itr_g_paying = artist_first_payable_pos, (groups_itr->weights.size() + 1), itr_g_paying++){// +1 needed to 
+              if (itr_g_paying == groups_itr->weights.size()) 
+                itr_g_paying = 0; // Loop bac to first recipient
+                
+            }//END for(itr_g_paying)
+          }//END if()paystarted
+            
+            // --- Determine Max + Real Pay by Weight --- \\ 
+            auto artist_paid = groups_itr->artists[artist_first_payable_pos];
+            auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
+            
+            // --- Send Group Member BLUX --- \\ 
+            send_blux(to, artist_paid, real_payment, memo);
+            remaining_ups -= real_payment;
+            
+
+            if(remaining_ups < 1 || remaining_ups > 99999999){ // It's the last payment
+              // --- Update the table with new Payposition --- \\ 
+              //TODO - Make Upsert function for Group info 
+              
+            }//END table update if (remaining_ups < 1)        
+
+        }//END if (last_position > 1)
        } else {// Dammit Charles, why don't you have any money?
          break;
        }
 
        // --- Send Solo Artist BLUX --- \\ 
        send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
-     }//END for(members)
+     }//END for(itr_g_members)
 
-     // --- Add group's Readable name to the memo --- \\
-     string prememo(ious_itr->intgroupname);
-     string prememo2(" ");
-     prememo = prememo + prememo2;
-     memo = prememo + memo;
-     
-     // --- Determine each member's pay --- \\
-     
-     
-     //Check if the table is instantiated
-     //Instantiate if it's not
-     
    }
   
    if (ious_itr->upstype ==  BIGSOL){
