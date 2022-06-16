@@ -77,7 +77,9 @@ ACTION ups::payup(void) {
   if (groupies) {// Instantiate the _groups table
     _groups(get_self(), get_self().value);
   }
-
+  
+  //READ ME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CHANGE itr to be different in each loop!!!!
+  
   for ( auto itr = ious_itr.rbegin(); itr >= ious_itr.rbegin() - 12; itr++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
    /*/ itr->secondary
      uint64_t ious_itr->iouid;
@@ -123,19 +125,31 @@ ACTION ups::payup(void) {
      // --- Make payments + update table --- \\
      for(int itr = 0, groups_itr->weights.size(), itr++){
        if(remaining_ups > 0){
-         // --- Determine Max Pay by Weight --- \\ 
+         // --- Tally previous pay positions --- \\
+        if (current_position > 1){// If less, No need to check the position
+          uint16_t artist_position = 0;
+          auto checked_position = current_position;
+          auto to_assign = ious_itr->upscount;
+          for (int itr_artist_position = 0, groups_itr->weights.size(), itr++){
+            
+          }
+        }//END if (current_position > 1)
+         
+         
+         // --- Determine Max + Real Pay by Weight --- \\ 
          auto artist_paid = groups_itr->artists[itr];
-
          auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
          
          // --- Send Group Member BLUX --- \\ 
-         send_blux(to, roups_itr->artists[itr], real_payment, memo);
-         
+         send_blux(to, groups_itr->artists[itr], real_payment, memo);
          remaining_ups -= real_payment;
          
-         if(itr + 1 == groups_itr->weights.size()){// If it's the last payment
+         //if(itr + 1 == groups_itr->weights.size()){//UGLY, but same, If it's the last payment
+         if(remaining_ups < 1){ // It's the last payment
+         
            // --- Update the table with new Payposition --- \\
            //TODO - Make Upsert function for Group info 
+           
          }
        } else {// Dammit Charles, why don't you have any money?
          break;
