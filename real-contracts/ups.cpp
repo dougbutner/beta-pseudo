@@ -80,7 +80,8 @@ ACTION ups::payup(void) {
   
   
   for ( auto itr_12 = ious_itr.rbegin(); itr_12 >= ious_itr.rbegin() - 12; itr_12++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
-   /*/ itr->secondary
+   /*/ 
+     itr->secondary
      uint64_t ious_itr->iouid;
      name ious_itr->upsender;
      name ious_itr->upcatcher;
@@ -221,7 +222,6 @@ ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artis
 // --- Register artist group, or change group information --- \\
 ACTION ups::updategroup(name intgroupname,  vector<string> groupinfo, string group_alias, vector<string> artists, vector<int8_t> weights) {
   // CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
-
   // IF (exists |artistgroup => intgroupname|) // Check member list 
     // CHECK (exists |artistgroup => artists => account|)
     // UPDATE |artistgroups => artistinfo|)

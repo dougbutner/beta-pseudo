@@ -259,13 +259,31 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   }//END if(results _upslog)
 }//END upsert_ious()
 
+
+
+// === Deleters === \\
+// --- Update running log of ups --- \\
+
 // --- Will remove blacklisted user's ups retroactively --- \\
+void removeups(name user) {
+  require_auth(get_self());
+  // --- Instantiate the ups + totals tables --- \\ 
+  
+  // --- 
+  
+  
+    // DELETE record from |ups| where (account == account )
+    // UPDATE record from |totals|
+    // call updatetotal()
+} 
+
+/*/ OLD VERSION OF ABOVE --- Will remove blacklisted user's ups retroactively --- \\
 ACTION ups::removeups(name user) {
   // IF caller == account
     // DELETE record from |ups| where (account == account )
     // UPDATE record from |totals|
     // call updatetotal()
-}
+} /*/
 
 
 // --- Makes sure people get paid --- \\
@@ -290,7 +308,7 @@ ACTION ups::removeiou(name sender, name receiver) {
   // DELETE records from |ious| where reciever = reciever && sender = sender 
 }
 
-// --- Keep track of total account amounts for ALL users --- \\
+// --- Keep track of total account amounts for ALL users --- \\ CHANGE TO UPSERT
 ACTION ups::updatelisten(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender) {
   // CHECK (caller = AUTH_ACCOUNT)
   // UPDATE record from |listeners|  
