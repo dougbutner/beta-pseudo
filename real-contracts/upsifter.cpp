@@ -1,4 +1,4 @@
-// --- Takes  --- \\
+// --- Normalize Up Input --- \\
 
 //NOTE This requires a variable `upstype`
 
