@@ -1,6 +1,6 @@
 // --- Takes  --- \\
 
-//NOTE This requires a variable name of 
+//NOTE This requires a variable `upstype`
 
 // --- Assert the type of ups --- \\
 up_type type_of_up = upstype;
