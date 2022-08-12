@@ -259,7 +259,69 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   }//END if(results _upslog)
 }//END upsert_ious()
 
-
+// --- Upsert Groups --- \\
+void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, vector<int8_t> weights, uint8_t payposition){ //NOTE payposition may be filled with dummy value of 9999 or greater
+  //require_auth( upsender ); //CHECK if this breaks call from payup for groups
+  
+  // --- Weights and Artists must be same length --- \\
+  check(artists.length == weights.length , "Artists and Weights lists must be the same length.");
+  check(artists.length < 13, "Groups can have a maximum of 12 artist accounts.");
+  
+  // --- Artists Must be Real Accounts --- \\
+  bool has_authorized_caller = false;
+  name authorized_caller;
+  for(itr_artists = 0, itr_artists < artists.length, itr_artists++ ){
+    check(is_account(artists[itr_artists]), string(to_string(artists[itr_artists])) + " is not a registered account." );
+    // --- Creator must be one of group members --- \\
+    if (has_auth(artists[itr_artists])){
+      has_authorized_caller = true;
+      authorized_caller = artists[itr_artists];
+    }
+  }//END for(itr_artists)
+  
+  //TODO - Assign an internal name if needed using the groupname
+  
+  //TODO --- Allow for contract-initiated calls --- \\
+  // Set authorized_caller, truthify has_authorized_caller
+  
+  // --- Weights must follow cXc limits --- \\
+  for(itr_weights = 0, itr_weights < weights.length, itr_weights++ ){
+    check( weights[itr_weights] < 13 , string("All weights must be whole numbers, 1-12"));
+  }
+  
+  // --- Deal with payposition --- \\
+  if(payposition > 9998){ // Failsafe for int overflow, also dummy value for user-initiated calls
+    payposition = 0;
+  }
+  
+  
+  
+  // --- Add record to _groups --- \\
+  check(has_authorized_caller, string("Only members of the group may update group information"));
+  _groups(get_self(), get_self().value);
+  auto groups_itr = _groups.find(groupname.value); 
+  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
+  //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
+  if( groups_itr == _groups.end())
+  { // -- Make New Record
+    _groups.emplace(authorized_caller, [&]( auto& row ) {
+      row.key = intgroupname; 
+      row.groupname = groupname;
+      row.artists = artists;
+      row.weights = weights;
+      row.payposition = payposition;
+    });
+  } 
+  else 
+  { // -- Update Record
+    _groups.modify(groups_itr, authorized_caller, [&]( auto& row ) {
+      row.groupname = groupname;
+      row.artists = artists;
+      row.weights = weights;
+      row.payposition = payposition;
+    });
+  }//END if(results _upslog)
+}//END upsert_group()
 
 // === Deleters === \\
 // --- Update running log of ups --- \\

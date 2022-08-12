@@ -146,7 +146,7 @@ private:
     name intgroupname; // abcdef.cxc // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
     vector<name> artists;
     vector<int8_t> weights;
-    vector<string> groupinfo; // CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs
+    //vector<string> groupinfo; //DEPRECIATED //CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs
     uint8_t payposition;  
     
     uint64_t primary_key() const { return intgroupname.value; }
@@ -180,7 +180,7 @@ private:
   
   // --- All info in *_info Artist info has removed Google rec for security --- \\ 
   void updateartist(name artist_wax, vector<string> artistinfo, string artistalias); 
-  void updateartistgroup(name intgroupname,  vector<string> groupinfo, string group_alias, vector<string> artists, vector<int8_t> weights);
+  //MOVED to upsert in helpups.cpp // void updateartistgroup(string groupname, name intgroupname, vector<string> artists, vector<int8_t> weights);
   
   
   // --- Declare the _tables for later use --- \\ 
