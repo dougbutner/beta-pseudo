@@ -157,8 +157,8 @@ private:
   
   
   TABLE internallog {
-    uint32_t lastpay;
-    uint32_t lastfullpay; //
+    uint32_t lastpay; // Last time the payment was called for all 
+    uint32_t lastfullpay; // All accounts sent BLUX 
     bool remaining; // Did we reach the end of who is owed to pay? 
     
     uint64_t primary_key() const { return (uint64_t) lastpay; } //WARN CHECK if this is singleton (it isn't, fix it)
@@ -191,6 +191,7 @@ private:
   artists_table _artists;
   groups_table _groups;
   totals_table _totals;
+  internallog _internallog;
   
 public:
   

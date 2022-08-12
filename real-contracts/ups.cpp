@@ -44,10 +44,10 @@ ACTION deepremvsong(uint32_t songid)
 
 // --- Send all owed payments listed in |ious|  --- \\
 ACTION ups::payup(void) {
-   // --- Check Time for min 5 minutes since last payment --- \\
+   // --- Min Wait 5 seconds since last full pay payment --- \\
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   _internallog(get_self(), get_self().value);
-  check(nftToTokenTable.get().primary_key() < (time_of_up + 3), "Please wait 5 seconds between each payup. ");//CHECK this syntax is correct
+  check(_internallog.get().primary_key() < (time_of_up + 4), "Please wait 5 seconds between each payup. ");
   
   // --- Get oldest IOUs from _ious Table --- \\
   _ious(get_self(), upsender.value);//CHECK WARN scope
