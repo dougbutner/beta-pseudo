@@ -63,7 +63,7 @@ ACTION ups::payup(void) {
     vector<int8_t> weights
   };
   
-  
+  // --- Check the next 12 entries for Groups --- \\
   for ( auto itr_g_check = ious_itr.rbegin(); itr_g_check >= ious_itr.rbegin() - 12; itr_g_check++ ) {//CHECK should ious_itr really be the table?
     if (uint8_t ious_itr->artisttype == 2){
       groupies = true;
@@ -97,17 +97,19 @@ ACTION ups::payup(void) {
    string memo1("BLUX pay for cxc.world/");
    string memo2(songid);
    string memo = memo1 + memo2;
-
+   
+   
    if(ious_itr->artisttype == 1) // 1=solo, 2=group
    {
+     // --- Send Solo Artist BLUX --- \\ 
      send_blux(to, ious_itr->upcatcher, quantity, memo);//EXPLAIN To = old from (this contract) WORKING (Add to FRESH)
    } else {
-     // --- Get the information from dagroup --- \\
+     // --- Pay Group of Artists-- \\
      
      // --- Add group's Readable name to the memo --- \\
      string prememo(ious_itr->intgroupname);
      string prememo2(" ");
-     prememo = prememo + prememo2;
+     prememo = prememo2 + prememo;
      memo = prememo + memo;
      
      // --- Get Artists and Weights --- \\
@@ -125,70 +127,67 @@ ACTION ups::payup(void) {
      }/*/
      
      // === Make payments + update table === \\
-     // --- Figure out who in group to pay first, then pay the rest --- \\
-     
+     // --- Figure out what # in groupmembers vector to pay by determining position --- \\
      for(int itr_g_members = 0, groups_itr->weights.size(), itr_g_members++){
        if(remaining_ups > 0){
         // --- Figure out who to pay --- \\
         uint32_t artist_first_payable_pos = 0;
-         
-        if (last_position > 1 || pay_started == false){
+        if (last_position < 1 || pay_started == false){
           // If less, No need to check the position
-          auto checked_position = 0;
-          auto to_assign = ious_itr->upscount;
-
-          for (int itr_artist_position = 0, groups_itr->weights.size(), itr_artist_position++){
+          auto checked_pay_position = 0;
+          for (int itr_artist_position = 0, itr_artist_position +1 >= groups_itr->weights.size(), itr_artist_position++){ // CHECK +1 is correct (0-based array)
             
-            checked_position += groups_itr->weights[itr_g_members];
+            checked_pay_position += groups_itr->weights[itr_g_members];
             //artist_position = itr_artist_position;
             
-            if ((checked_position + groups_itr->weights[itr_g_members + 1]) <= remaining_ups){// This is the person to be paid
+            // --- Check Weight (BLUX owed per full-circle) --- \\
+            if ((checked_pay_position + groups_itr->weights[itr_g_members + 1]) <= remaining_ups){// This is the person to be paid
               artist_first_payable_pos = itr_artist_position;
               pay_started = true;
               break;
             }//END position check <= remaining_ups
-          }//END for(itr_artist_position)
+            
+          }//END for(itr_artist_position)  
+        }//END if (last_position > 1)
           
-          if (pay_started){
-            // --- Loop starting at the artist_first_payable_pos --- \\
-            for(int itr_g_paying = artist_first_payable_pos, (groups_itr->weights.size() + 1), itr_g_paying++){// +1 needed to 
-              if (itr_g_paying == groups_itr->weights.size()) 
-                itr_g_paying = 0; // Loop bac to first recipient
-                
-            }//END for(itr_g_paying)
-          }//END if()paystarted
+          // --- Loop starting at the artist_first_payable_pos --- \\
+          check(pay_started, "Group payments failed");
+          for(int itr_g_paying_pos_extended = artist_first_payable_pos, itr_g_paying_pos_extended >= /* (groups_itr->weights.size() + artist_first_payable_pos) ||*/ remaining_ups < 1, itr_g_paying_pos_extended++){ 
+            if (itr_g_paying_pos_extended == groups_itr->weights.size()){
+              itr_g_paying_pos_extended = 0; // Loop back to first recipient
+            } 
             
-            // --- Determine Max + Real Pay by Weight --- \\ 
-            auto artist_paid = groups_itr->artists[artist_first_payable_pos];
-            auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
+            if (remaining_ups > 0 && remaining_ups < 99999999999){              
+              // --- Determine Max + Real Pay by Weight --- \\ 
+              auto artist_paid = groups_itr->artists[artist_first_payable_pos];
+              auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
+              
+              // --- Send Group Member BLUX --- \\ 
+              send_blux(to, artist_paid, real_payment, memo);
+              remaining_ups -= real_payment;
+            }
             
-            // --- Send Group Member BLUX --- \\ 
-            send_blux(to, artist_paid, real_payment, memo);
-            remaining_ups -= real_payment;
-            
-
             if(remaining_ups < 1 || remaining_ups > 99999999){ // It's the last payment
               // --- Update the table with new Payposition --- \\ 
+              
+              
               //TODO - Make Upsert function for Group info 
               
             }//END table update if (remaining_ups < 1)        
+            
+          }//END for(itr_g_paying_pos_extended)
 
-        }//END if (last_position > 1)
-       } else {// Dammit Charles, why don't you have any money?
+       } else {// CHECK: Is this position correct? (things moved) Dammit Charles, why don't you have any money? 
          break;
        }
-
-       // --- Send Solo Artist BLUX --- \\ 
-       send_blux(to, ious_itr->upcatcher, quantity, memo);//To = old from (this contract) WORKING (Add to FRESH)
      }//END for(itr_g_members)
-
    }
   
    if (ious_itr->upstype ==  BIGSOL){
      // --- How many Big Ups --- \\
      auto big_ups_count = floor(ious_itr->upscount / 64);
-     // --- Mint NFTs for Big Ups --- \\
-   }
+     // --- Mint NFTs for Big Ups to the SENDER --- \\
+   }//END if (ious_itr->upstype == BIGSOL)
  }//END for (12 IOUs)
   
   //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
