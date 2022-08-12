@@ -94,9 +94,11 @@ ACTION ups::payup(void) {
    
    // --- Build Memo --- \\
    uint32_t songid = iouid_to_songid(ious_itr->iouid);
-   string memo1("BLUX pay for cxc.world/");
+   /* string memo1("BLUX pay for cxc.world/");
    string memo2(songid);
-   string memo = memo1 + memo2;
+   string memo = memo1 + memo2; */
+   
+   string memo = string("BLUX pay for cxc.world/" + to_string(songid) + " ");
    
    
    if(ious_itr->artisttype == 1) // 1=solo, 2=group
@@ -106,11 +108,12 @@ ACTION ups::payup(void) {
    } else {
      // --- Pay Group of Artists-- \\
      
-     // --- Add group's Readable name to the memo --- \\
-     string prememo(ious_itr->intgroupname);
+     // --- Add group's Readable name to the memo --- \\ TODO refactor using string(memo + memo2)
+     /*string prememo(ious_itr->intgroupname);
      string prememo2(" ");
      prememo = prememo2 + prememo;
-     memo = prememo + memo;
+     memo = prememo + memo;*/
+     memo = string(memo + to_string(ious_itr->intgroupname); //CHECK to_string is used correctly
      
      // --- Get Artists and Weights --- \\
      auto groups_itr = _groups.require_find(ious_itr->upcatcher); //CHECK that the _require won't cause transactions to fail
