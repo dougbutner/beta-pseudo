@@ -164,7 +164,7 @@ private:
     uint64_t primary_key() const { return (uint64_t) lastpay; } //WARN CHECK if this is singleton (it isn't, fix it)
   };
   
-  using cxclog_table = multi_index<name("artistgroups"), artistgroups>;
+  using cxclog_table = multi_index<name("internallog"), internallog>;
   
   
   void updateup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); //DISPATCHER
@@ -191,7 +191,7 @@ private:
   artists_table _artists;
   groups_table _groups;
   totals_table _totals;
-  internallog _internallog;
+  cxclog_table _internallog;
   
 public:
   
