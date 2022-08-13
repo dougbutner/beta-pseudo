@@ -259,6 +259,8 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   }//END if(results _upslog)
 }//END upsert_ious()
 
+
+
 // --- Upsert Groups --- \\
 void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, vector<int8_t> weights, uint8_t payposition){ //NOTE payposition may be filled with dummy value of 9999 or greater
   //require_auth( upsender ); //CHECK if this breaks call from payup for groups
@@ -279,7 +281,10 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
     }
   }//END for(itr_artists)
   
-  //TODO - Assign an internal name if needed using the groupname
+  // --- Verify the groupname is unique --- \\
+  if(payposition > 9998){ // Flag for OG registration of the group
+    //NOTE I don't think we need to do this anymore, as the TX will fail because it is primary key
+  }
   
   //TODO --- Allow for contract-initiated calls --- \\
   // Set authorized_caller, truthify has_authorized_caller
@@ -292,9 +297,9 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
   // --- Deal with payposition --- \\
   if(payposition > 9998){ // Failsafe for int overflow, also dummy value for user-initiated calls
     payposition = 0;
+  } else { // Call is internal
+    require_auth(get_self());
   }
-  
-  
   
   // --- Add record to _groups --- \\
   check(has_authorized_caller, string("Only members of the group may update group information"));
@@ -314,7 +319,7 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
   } 
   else 
   { // -- Update Record
-    _groups.modify(groups_itr, authorized_caller, [&]( auto& row ) {
+    _groups.modify(groups_itr, get_self(), [&]( auto& row ) {
       row.groupname = groupname;
       row.artists = artists;
       row.weights = weights;

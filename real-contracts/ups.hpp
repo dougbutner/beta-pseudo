@@ -142,8 +142,8 @@ private:
   using artists_table = multi_index<name("artists"), artists>;
   
   TABLE artistgroups {
-    string groupname;
     name intgroupname; // abcdef.cxc // CHECK is there benefit to a name (uint64_t) vs a simple uint32_t? 
+    string groupname;
     vector<name> artists;
     vector<int8_t> weights;
     //vector<string> groupinfo; //DEPRECIATED //CHECK this will work, can pass empty strings, or is there an <auto> type, key value pairs

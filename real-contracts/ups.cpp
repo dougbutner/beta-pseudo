@@ -30,7 +30,7 @@ ACTION deepremvsong(uint32_t songid)
   _songs(_self, _self.value);
   
   // --- Check for song in table --- \\ 
-  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ).c_str() );
+  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
@@ -155,9 +155,9 @@ ACTION ups::payup(void) {
           
           // --- Loop starting at the artist_first_payable_pos --- \\
           check(pay_started, "Group payments failed");
-          for(int itr_g_paying_pos_extended = artist_first_payable_pos, itr_g_paying_pos_extended >= /* (groups_itr->weights.size() + artist_first_payable_pos) ||*/ remaining_ups < 1, itr_g_paying_pos_extended++){ 
-            if (itr_g_paying_pos_extended == groups_itr->weights.size()){
-              itr_g_paying_pos_extended = 0; // Loop back to first recipient
+          for(int itr_g_paying_pos = artist_first_payable_pos, remaining_ups < 1, itr_g_paying_pos++){ /*itr_g_paying_pos >= (groups_itr->weights.size() + artist_first_payable_pos) ||*/
+            if (itr_g_paying_pos == groups_itr->weights.size()){
+              itr_g_paying_pos = 0; // Loop back to first recipient
             } 
             
             if (remaining_ups > 0 && remaining_ups < 99999999999){              
@@ -173,12 +173,17 @@ ACTION ups::payup(void) {
             if(remaining_ups < 1 || remaining_ups > 99999999){ // It's the last payment
               // --- Update the table with new Payposition --- \\ 
               
+              // --- Check for song in table --- \\ 
+              auto groups_iter = _groups.require_find( ious_itr->intgroupname, string( "Group " + to_string(ious_itr->intgroupname) + " was not found when we tried to pay." ) );
               
-              //TODO - Make Upsert function for Group info 
+              // --- Update Pay Position --- \\
+              _groups.modify(groups_iter, get_self(), [&]( auto& row ) {
+                row.payposition = payposition;
+              });
               
             }//END table update if (remaining_ups < 1)        
             
-          }//END for(itr_g_paying_pos_extended)
+          }//END for(itr_g_paying_pos)
 
        } else {// CHECK: Is this position correct? (things moved) Dammit Charles, why don't you have any money? 
          break;
@@ -222,13 +227,9 @@ ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artis
 }
 
 // --- Register artist group, or change group information --- \\
-ACTION ups::updategroup(name intgroupname,  vector<string> groupinfo, string group_alias, vector<string> artists, vector<int8_t> weights) {
-  // CHECK (artists.length = weights.length OR 0 weights && 0 members) // 0 = no update, both or none
-  // IF (exists |artistgroup => intgroupname|) // Check member list 
-    // CHECK (exists |artistgroup => artists => account|)
-    // UPDATE |artistgroups => artistinfo|)
-  // else 
-  // INSERT |artistgroups|
+ACTION ups::updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo) {
+  // --- Call the upsert helper function with payposition flag 9999 --- \\
+  upsert_groups(intgroupname, group_alias, artists, weights, groupinfo, 9999);
 }
 
 
