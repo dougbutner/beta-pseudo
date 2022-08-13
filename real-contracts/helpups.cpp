@@ -2,7 +2,7 @@
 /*/
 WORKING ISSUES 
 
-We may need to remove all the extranious updaters to move to a standard function. 
+We may need to remove all the updaters to move to a standard function. 
 - Avoids spinning up a new environment to execute 
 
 /*/
@@ -59,7 +59,7 @@ uint32_t find_tu(void){
   return time_unit;
 }
 
-// --- Get Songid from iouif (concat of tuid + songid) --- \\
+// --- Get Songid from iouid (concat of tuid + songid) --- \\
 uint32_t iouid_to_songid(uint32_t iouid){
   uint32_t songid = (uint32_t) iouid;
   return songid;
@@ -387,8 +387,8 @@ ACTION ups::removelisten(name upsender) {
   // DELETE record from |listeners|  
 }
 
-// --- DIPATCHER ACTION Checks + calls logup() updateiou() and updatetotal() --- \\
-ACTION ups::updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
+// --- DIPATCHER Checks + calls logup() updateiou() and updatetotal() --- \\
+void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid) {  
   // --- Calls action to update the TOTALS table -- \\
   //DEP ups::updatetotal(upscount, upstype, upsender, songid);  //WARN CHECK may be better to just to the upsert function
   upsert_total(upscount, upstype, upsender, songid);

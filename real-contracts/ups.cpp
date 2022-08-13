@@ -13,7 +13,8 @@ ACTION removesong(uint32_t songid)
 ACTION deepremvsong(uint32_t songid)
 /*/
 
-// --- Receive tokens sent to contract + make ups --- \\
+// --- Receive SOL sent to contract + make ups --- \\
+//NOTE UPs memo is either an integer of the songid, or the songid with " BIG appended" or any other string
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {  
   uint32_t songid_upped;
@@ -30,17 +31,52 @@ ACTION deepremvsong(uint32_t songid)
   _songs(_self, _self.value);
   
   // --- Check for song in table --- \\ 
-  auto song_iter = _songs.require_find( songid_upped, string( "Song " + to_string(songid_upped) + " was not found." ) );
+  auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
+
+  // --- Set up Variables --- \\
+  uint32_t quantity = uint32_t(quantity);
+  
+  // --- Check if BIG --- \\
+  auto ups_type;
+  if(!isdigit( memo.back() ) ){
+    ups_type = BIGSOL;
+  } else {
+    ups_type = SOL;
+  }
+  
+  // --- Pass on to updateup() --- \\
+  updateup(quantity, ups_type, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  
+}//END listen->SOL ups 
+
+
+// --- Receive BLUX sent to contract + make ups --- \\
+[[eosio::on_notify("bluxbluxblux::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
+{  
+  uint32_t songid_upped;
+  require_auth(get_self());
+  
+  // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
+  if (to != _self) return; // internal function no need to check()
+
+  // --- Token-symbol + Memo = Songid Check --- \\
+  check(quantity.symbol == symbol("BLUX", 0), "Accepting SOL and BLUX only");  
+  songid_upped = stoi(memo); // Set memo (songid) to <int> 
+  
+  // --- Instantiate Table --- \\
+  _songs(_self, _self.value);
+  
+  // --- Check for song in table --- \\ 
+  auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
   uint32_t quantity = uint32_t(quantity);
 
   // --- Pass on to updateup() --- \\
-  ups::updateup(quantity, 1, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity, 2, song_iter, upsender); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
-}//END listen->SOL ups 
+}//END listen->BLUX ups 
 
-//NOTE need separate LISTENER for Bluups
 
 // --- Send all owed payments listed in |ious|  --- \\
 ACTION ups::payup(void) {
