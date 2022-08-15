@@ -16,11 +16,11 @@ ACTION deepremvsong(uint32_t songid)
 //NOTE UPs memo is either an integer of the songid, or the songid with " BIG appended" or any other string
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {  
+  // --- Check that we're the intended recipient --- \\ 
+  if (to != _self) return; 
+  
   uint32_t songid_upped;
   require_auth(get_self());
-  
-  // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
-  if (to != _self) return; // internal function no need to check()
 
   // --- Token-symbol + Memo = Songid Check --- \\
   check(quantity.symbol == symbol("SOL", 0), "Accepting SOL and BLUX only");  
@@ -45,7 +45,7 @@ ACTION deepremvsong(uint32_t songid)
   }
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, ups_type, song_iter, upsender); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity, ups_type, song_iter, upsender, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->SOL ups 
 
@@ -53,11 +53,11 @@ ACTION deepremvsong(uint32_t songid)
 // --- Receive BLUX sent to contract + make ups --- \\
 [[eosio::on_notify("bluxbluxblux::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {  
+  // --- Check that we're the intended recipient --- \\ 
+  if (to != _self) return; 
+  
   uint32_t songid_upped;
   require_auth(get_self());
-  
-  // --- Check that we're the intended recipient --- \\ //CHECK Is this really needed
-  if (to != _self) return; // internal function no need to check()
 
   // --- Token-symbol + Memo = Songid Check --- \\
   check(quantity.symbol == symbol("BLUX", 0), "Accepting SOL and BLUX only");  
@@ -73,7 +73,7 @@ ACTION deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
 
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 2, song_iter, upsender); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity, 2, song_iter, upsender, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->BLUX ups 
 

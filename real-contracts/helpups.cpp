@@ -112,8 +112,11 @@ void send_blux( const name&    from,
 }//END send_blux()
 
 // === Upserterterses === \\
+
 // --- Update running log of ups --- \\
-void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid){
+void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool negative){
+  //NOTE negative should only be called for deletions (user gets removed from system)
+  
   require_auth( upsender );
   uint32_t momentu = find_tu();
   
@@ -136,13 +139,25 @@ void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t so
   } 
   else 
   { // -- Update Record
-    _upslog.modify(upslog_iterator, upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
-      row.key = songid;
-      row.totalsolups += newsolups;
-      row.totalbluups += newbluups;
-      row.totalbigups += newbigups;
-      //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
-    });
+    if (negative){
+      _upslog.modify(upslog_iterator, upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+        row.key = songid;
+        row.totalsolups -= newsolups;
+        row.totalbluups -= newbluups;
+        row.totalbigups -= newbigups;
+        //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
+      });
+    } else {
+      _upslog.modify(upslog_iterator, upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
+        row.key = songid;
+        row.totalsolups += newsolups;
+        row.totalbluups += newbluups;
+        row.totalbigups += newbigups;
+        //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
+      });
+    }
+
+    
   }//END if(results _upslog) 
 }
 
@@ -379,18 +394,15 @@ ACTION ups::removelisten(name upsender) {
 }
 
 
-// --- Overload for non-negative calls --- \\
-void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid, bool negative){
-  updateup(upscount, upstype, upsender, songid, 0);
-}
-
 // --- DIPATCHER Checks + calls logup() updateiou() and updatetotal() --- \\
 void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid, bool negative) {  
-  // --- Calls action to update the TOTALS table -- \\
-  upsert_total(upscount, upstype, upsender, songid);
-  
-  // --- Log the ups in UPSLOG table --- \\ 
-  upsert_logup(upscount, upstype, upsender, songid);
+  if (!negative){
+    // --- Log the ups in UPSLOG table --- \\ 
+    upsert_logup(upscount, upstype, upsender, songid, 0);
+    
+    // --- Calls action to update the TOTALS table -- \\
+    upsert_total(upscount, upstype, upsender, songid);
+  }
   
   // --- Record the Up to be paid via IOUS table --- \\
   upsert_iou(upscount, upstype, upsender, songid, negative);
