@@ -80,27 +80,30 @@ uint32_t iouid_to_tuid(uint32_t iouid){
 void send_blux( const name&    from,
                 const name&    to,
                 const uint32_t  quantity, 
-                const string&  memo)
+                const string&  memo,
+                const uint32_t& songid
+              )
 {
   
   string blux_string = "BLUX"
   symbol blux_symbol = eosio::symbol_code::symbol_code(blux_string);
   asset blux_asset = eosio::asset::asset( int64_t quantity, class symbol blux_symbol );
   
-  send_blux(from, to, blux_asset, memo);
+  send_blux(from, to, blux_asset, memo, songid);
 }//END unit-accepting overloaded send_blux()
 //CHECK set permission eosio.code on the BLUX contract
 void send_blux( const name&    from,
                 const name&    to,
                 const asset&   quantity, 
-                const string&  memo)
+                const string&  memo,
+                const uint32_t& songid)
 {
   // --- Check that this contract is the caller  --- \\
   require_auth(get_self());
   //require_recipient(to);
   if (to != get_self() || from == get_self() || quantity::amount < 0)//CHECK last quantity::amount is correct
   {
-      return;
+    return;
   }
   
   action(
@@ -109,7 +112,8 @@ void send_blux( const name&    from,
       "transfer"_n,
       std::make_tuple(get_self(), from, to, quantity, memo)
   ).send();
-}//END send_blux()
+  
+}//END Final send_blux() 
 
 // === Upserterterses === \\
 
@@ -454,7 +458,7 @@ void payupsender(name upsender){
      if(ious_itr->artisttype == 1) // 1=solo, 2=group
      {
        // --- Send Solo Artist BLUX --- \\ 
-       send_blux(to, ious_itr->upcatcher, quantity, memo);//EXPLAIN To = old from (this contract) WORKING (Add to FRESH)
+       send_blux(to, ious_itr->upcatcher, quantity, memo, songid);//EXPLAIN To = old from (this contract) WORKING (Add to FRESH)
      } else {
        // === Pay Group of Artists === \\
       
@@ -507,7 +511,7 @@ void payupsender(name upsender){
                 auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
                 
                 // --- Send Group Member BLUX --- \\ 
-                send_blux(to, artist_paid, real_payment, memo);
+                send_blux(to, artist_paid, real_payment, memo, songid);
                 remaining_ups -= real_payment;
               }
               
