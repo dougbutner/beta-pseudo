@@ -45,7 +45,7 @@ ACTION deepremvsong(uint32_t songid)
   }
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity, ups_type, song_iter, upsender, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity.amount, ups_type, upsender, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->SOL ups 
 
@@ -73,7 +73,7 @@ ACTION deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
 
   // --- Pass on to updateup() --- \\
-  updateup(quantity, 2, song_iter, upsender, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity.amount, 2, upsender, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->BLUX ups 
 

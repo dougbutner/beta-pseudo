@@ -101,7 +101,7 @@ void send_blux( const name&    from,
   // --- Check that this contract is the caller  --- \\
   require_auth(get_self());
   //require_recipient(to);
-  if (to != get_self() || from == get_self() || quantity::amount < 0)//CHECK last quantity::amount is correct
+  if (to != get_self() || from == get_self() || quantity.amount < 0 || quantity.amount > 99999999)//CHECK last quantity::amount is correct
   {
     return;
   }
@@ -112,6 +112,9 @@ void send_blux( const name&    from,
       "transfer"_n,
       std::make_tuple(get_self(), from, to, quantity, memo)
   ).send();
+  
+  // --- Pass on to updateup() to remove IOUs with 1 to flag removal --- \\
+  updateup(quantity.amount, BIGSOL, to, songid, 1);
   
 }//END Final send_blux() 
 
@@ -408,9 +411,11 @@ void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t son
     upsert_total(upscount, upstype, upsender, songid);
   }
   
-  // --- Record the Up to be paid via IOUS table --- \\
-  upsert_iou(upscount, upstype, upsender, songid, negative);
-}
+  if (upstype != BLUX){
+    // --- Record the Up to be paid via IOUS table --- \\
+    upsert_iou(upscount, upstype, upsender, songid, negative);
+  }  
+}//END updateup()
 
 // --- Sends BLUX, clears IOUS. Called from overloaded payup() --- \\
 void payupsender(name upsender){
