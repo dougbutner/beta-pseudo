@@ -3,8 +3,7 @@
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
-/*/
-ACTION payup(void); // Default call 
+/*/ TODO
 ACTION payup(name upsender); // User's call to pay themselves
 ACTION updateartist(name artistacc, vector<string> artistinfo, string artistalias);
 ACTION updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo);
@@ -37,6 +36,7 @@ ACTION deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
   
   // --- Check if BIG --- \\
+  //EXPLAIN - Passing a character at the end of the memo (instead of just songid) triggers BIG check (app does "2947 BIG")
   auto ups_type;
   if(!isdigit( memo.back() ) ){
     ups_type = BIGSOL;
@@ -116,24 +116,8 @@ ACTION ups::payup(void) {
   
   
   for ( auto itr_12 = ious_itr.rbegin(); itr_12 >= ious_itr.rbegin() - 12; itr_12++ ) {//CHECK (optimize/test) Goes 12 rows deep to avoid failed TX 
-   /*/ 
-     itr->secondary
-     uint64_t ious_itr->iouid;
-     name ious_itr->upsender;
-     name ious_itr->upcatcher;
-     uint8_t ious_itr->artisttype;
-     uint32_t ious_itr->upscount // Should be either BIGSOL or sol up or both
-     uint8_t ious_itr->upstype
-     uint32_t ious_itr->initiated;
-     uint32_t ious_itr->updated; 
-   /*/
-   
    // --- Build Memo --- \\
    uint32_t songid = iouid_to_songid(ious_itr->iouid);
-   /* string memo1("BLUX pay for cxc.world/");
-   string memo2(songid);
-   string memo = memo1 + memo2; */
-   
    string memo = string("BLUX pay for cxc.world/" + to_string(songid) + " ");
    
    
@@ -142,13 +126,9 @@ ACTION ups::payup(void) {
      // --- Send Solo Artist BLUX --- \\ 
      send_blux(to, ious_itr->upcatcher, quantity, memo);//EXPLAIN To = old from (this contract) WORKING (Add to FRESH)
    } else {
-     // --- Pay Group of Artists-- \\
-     
+     // === Pay Group of Artists === \\
+    
      // --- Add group's Readable name to the memo --- \\ TODO refactor using string(memo + memo2)
-     /*string prememo(ious_itr->intgroupname);
-     string prememo2(" ");
-     prememo = prememo2 + prememo;
-     memo = prememo + memo;*/
      memo = string(memo + to_string(ious_itr->intgroupname); //CHECK to_string is used correctly
      
      // --- Get Artists and Weights --- \\
@@ -159,12 +139,7 @@ ACTION ups::payup(void) {
      auto current_position = 0;
      auto total_positions = std::accumulate(groups_itr->weights.begin(), groups_itr->weights.end(), 0);
      bool pay_started = false;
-     
-     /*/ HERE IN CASE ABOVE FAILS --- Get the total amount of payments --- \\
-     for(int itr = 0, groups_itr->weights.size(), itr++){
-       total_positions += groups_itr->weights[itr];
-     }/*/
-     
+
      // === Make payments + update table === \\
      // --- Figure out what # in groupmembers vector to pay by determining position --- \\
      for(int itr_g_members = 0, groups_itr->weights.size(), itr_g_members++){
@@ -234,22 +209,10 @@ ACTION ups::payup(void) {
    }//END if (ious_itr->upstype == BIGSOL)
  }//END for (12 IOUs)
   
-  //auto& user_iterator = _upslog.find(username.value); // WARN jumped to other thing, this is not good
-  //auto& ur_ious = _ious.get(username.value, "User doesn't exist");
-  // Make [] with each record of owed to depth of 12 rows, starting with oldest
-  // if (account is group)
-    // READ |artistgroups => payposition|
-    // Compile [] of the members owed by counting off each position and weight until all reward is given out
-  // TRANSFER the total sum owed to account[s]
-  // UPDATE / DELETE |ups.cxc => ious| table to reflect changes 
-
-
 }//END payup(void)
 
 // --- Send owed payments listed in |ious| for one account --- \\
 ACTION ups::payup(name upsender) {
-// Same as above but with account
-  //require_auth(username);
 
 }//END payup(void)
 
