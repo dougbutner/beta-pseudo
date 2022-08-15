@@ -353,15 +353,6 @@ ACTION ups::removeups(name user) {
 } /*/
 
 
-// --- Makes sure people get paid --- \\
-ACTION ups::updateiou(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool subtract) {
-  //NOTE all PURPLE IOUs are now stored on a Charts contract
-  // if (record exists in |ious|)
-    // UPDATE record from |ious|
-    // else 
-    // INSERT record into |ious|
-    
-}
 
 // --- All IOUS are removed from table once paid --- \\
 ACTION ups::removeiou(name sender, name receiver) {

@@ -170,8 +170,6 @@ private:
   void updateup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); //DISPATCHER
   void logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
   void removeups(name user); 
-//  void updatetotal(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
-  void updateiou(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool subtract); //CHANGE this is the wrong params
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
   void updatelisten(uint32_t upscount, uint8_t upstype, name upsender);
   void removelisten(name upsender);
