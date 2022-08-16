@@ -1,4 +1,7 @@
 // --- Songs Helper Contract for ups.cxc --- \\
+const uint8_t G_LEN = 39;
+const uint8_t M_LEN = 21;
+const uint8_t F_LEN = 14;
 
 enum genre : uint8_t {
   NONE = 0, // NOTE null->none CONVERSION NEEDED `NONE` is used here because NULL is a reserved word 
@@ -65,7 +68,7 @@ enum mood : uint8_t {
   INTROSPECTIVE = 18,
   TRIPPY = 19,
   MAGICAL = 20,
-  ROMANTIC = 21,
+  ROMANTIC = 21
 };
 
 enum format : uint8_t {

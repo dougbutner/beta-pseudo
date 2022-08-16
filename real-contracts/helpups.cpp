@@ -120,6 +120,69 @@ void send_blux( const name&    from,
 
 // === Upserterterses === \\
 
+/*/ SONG 
+uint32_t songid;
+name artistacc; 
+uint8_t artisttype;
+song song;
+
+struct song {
+  string title;
+  vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
+  uint8_t genre;
+  uint8_t mood;
+  uint8_t format;
+  string atomictempid;
+};
+
+/*/
+
+// --- Add + Fix Songs in the Database --- \\ 
+void upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme){
+  
+  if(songid != 0){ // Update
+    
+  }
+  
+  if(deleteme){ // Delete
+    
+    // --- Find the song in the _songs table --- \\
+    auto songs_iterator = _songs.require_find(songid, string("Song not found"));
+    
+    // --- Erase Song --- \\ 
+    _songs.erase(songs_iterator);   
+    
+    // --- Verify the song was successfully deleted --- \\
+     check(_songs.find(songid == _songs.end(), "There was a problem deleting the song");
+
+  }//END if(deleteme)
+  else {
+    
+    auto songs_iterator = _songs.find(songid);
+    
+    if( songs_iterator == _songs.end() )
+    { // -- Make New Record
+      _songs.emplace(adderacc, [&]( auto& row ) {
+        row.key = songid;
+        row.artistacc = artistacc;
+        row.artisttype = artisttype;
+        row.song = song;
+      });
+    } 
+    else 
+    { // -- Update Record
+      _songs.modify(songs_iterator, adderacc, [&]( auto& row ) {
+        row.artistacc = artistacc;
+        row.artisttype = artisttype;
+        row.song = song;
+      });    
+    }//END if(results _songs) 
+  }//END if(deleteme) else
+  
+}//END upsert_song
+
+
+
 // --- Update running log of ups --- \\
 void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid, bool negative){
   //NOTE negative should only be called for deletions (user gets removed from system)
@@ -152,7 +215,6 @@ void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t so
         row.totalsolups -= newsolups;
         row.totalbluups -= newbluups;
         row.totalbigups -= newbigups;
-        //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
       });
     } else {
       _upslog.modify(upslog_iterator, upsender, [&]( auto& row ) {//URGENT This needs to be changed when we figure out the PK issue
@@ -160,7 +222,6 @@ void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t so
         row.totalsolups += newsolups;
         row.totalbluups += newbluups;
         row.totalbigups += newbigups;
-        //row.tuid = momentu; // This should be the same, we shouldn't be updating old TUs. May consider leaving in for mid-sec tx??
       });
     }
 
@@ -471,7 +532,7 @@ void payupsender(name upsender){
        memo = string(memo + to_string(ious_itr->intgroupname); //CHECK to_string is used correctly
        
        // --- Get Artists and Weights --- \\
-       auto groups_itr = _groups.require_find(ious_itr->upcatcher); //CHECK that the _require won't cause transactions to fail
+       auto groups_itr = _groups.require_find(ious_itr->upcatcher, string("Group not found")); //CHECK that the _require won't cause transactions to fail
        
        auto remaining_ups = ious_itr->upscount;
        auto last_position = groups_itr->payposition;

@@ -85,7 +85,7 @@ ACTION ups::payup(void) {
 
 // --- Send owed payments listed in |ious| for one account ROUTES to payupsender  --- \\
 ACTION ups::payup(name upsender) {
-  payupsender();
+  payupsender(upsender);
 }//END payup(void)
 
 // --- Register artist, or change artist information --- \\
@@ -110,17 +110,47 @@ ACTION ups::updategroup(name intgroupname, string group_alias, vector<string> ar
   upsert_groups(intgroupname, group_alias, artists, weights, groupinfo, 9999);
 }
 
+/*/ SONG 
+uint32_t songid;
+name artistacc; 
+uint8_t artisttype;
+song song;
+
+struct song {
+  string title;
+  vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
+  uint8_t genre;
+  uint8_t mood;
+  uint8_t format;
+  string atomictempid;
+};
+/*/
 
 // --- WARN NEEDS REVIEW Update song info or receiving account --- \\
-ACTION ups::updatesong(uint32_t songid, name artistacc) { 
-  // NOTE : Music 
-  // NOTE: Remove the '-' from genres coming from cXc.world, use enum
-  // CHECK (sender = artist || sender = AUTH_ACCOUNT)
-    // if (group) CHECK (sender is in |artistgroups|)
-  // IF (exists |so => account|)
-  // UPDATE |songs = songid|)
-  // else 
-  // INSERT |songs|
+//WARN CHECK TODO currrently only works with songs with NFTs
+ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint8_t mood, uint8_t format, uint64_t atomictempid, name artistacc, name adderacc, uint32_t songid) { 
+  require_auth(adderacc); 
+  
+  // --- Validate GMF Information --- \\
+  check(genre <= G_LEN, string("Genre code isn't recognized"));
+  check(mood <= M_LEN, string("Mood code isn't recognized"));
+  check(format <= F_LEN, string("Format code isn't recognized"));
+  
+  // --- Validate Artist is signing --- \\
+  
+  //struct car c = {.year=1923, .make="Nash", .model="48 Sports Touring Car"};
+  
+  struct song song = {.title = title; .geoloc=geoloc; .genre=genre; .mood=mood; .format=format; .atomictempid=atomictempid;};
+  
+  
+    // TODO if (group) CHECK (sender is in |artistgroups|)
+    // TODO How are we allowing anyone to update? Tracking last updater? Checking the record of updates?
+    // 
+  
+  
+  upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme);
+  
+
 }
 
 

@@ -17,7 +17,6 @@ public:
 
 struct song {
   string title;
-  vector<string> links; //CHECK this concept, look how others do it, Atomic, etc
   vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
   uint8_t genre;
   uint8_t mood;
@@ -82,7 +81,6 @@ private:
     name artistacc;
     uint8_t artisttype;
     song song;
-    //uint64_t aatemplateid; // removed becaise it is in the song struct
     
     uint64_t primary_key() const { return (uint64_t) songid; }
     // Waiting on Emanate to see if we'll use something to connect them
@@ -204,5 +202,5 @@ public:
   
   ACTION updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo);
   
-  ACTION updatesong(uint32_t songid, song dasong); //CHECK I'm not sure how to put in song custom struct
+  ACTION updatesong(uint32_t songid, song dasong); 
 };
