@@ -81,9 +81,8 @@ private:
     name artistacc;
     uint8_t artisttype;
     song song;
-    
+        
     uint64_t primary_key() const { return (uint64_t) songid; }
-    // Waiting on Emanate to see if we'll use something to connect them
   };
   
   using songs_table = multi_index<name("songs"), songs>;

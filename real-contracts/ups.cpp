@@ -141,25 +141,64 @@ ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint
   //struct car c = {.year=1923, .make="Nash", .model="48 Sports Touring Car"};
   
   struct song song = {.title = title; .geoloc=geoloc; .genre=genre; .mood=mood; .format=format; .atomictempid=atomictempid;};
-  
-  
     // TODO if (group) CHECK (sender is in |artistgroups|)
     // TODO How are we allowing anyone to update? Tracking last updater? Checking the record of updates?
-    // 
-  
-  
   upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme);
-  
-
 }
 
 
 // --- Remove the song from earning potential --- \\
 ACTION ups::removesong(uint32_t songid) {
-
-}
+ // --- Only We, Artist, and Uploader can remove the song --- \\
+ bool authorized = false;
+ if (has_auth(adderacc) || has_auth(artistacc) || has_auth("cxc"_n) || has_auth(eosio.code){
+   authorized = true;
+ }
+ 
+ check(authorized, "Only artist and uploader can update this contract.");
+ 
+ remove_song(songid);
+}//END removesong()
 
 // --- Remove all record of song in RAM --- \\
 ACTION ups::deepremvsong(uint32_t songid) {
+  // --- Only We + Artist can deep-remove the song --- \\
+  bool authorized = false;
+  if (has_auth(artistacc) || has_auth("cxc"_n) || has_auth(eosio.code){
+    authorized = true;
+  }
+  
+  check(authorized, "Only the artist can remove records of this song");
+  
+  // === Remove From Totals + Upslog tables === \\
+  
+  // --- Find the song in the _upslog table, erase, verify --- \\ by_songid bysongid
+  auto upslog_iterator = _upslog.get_index<"bysongid"_n>();
+  uint8_t stepper = 0;
+  uint8_t max_steps = 33; //TODO make this a singleton to be able to update it
+  if(upslog_iterator != _upslog.end()){// Records Exist
+    for(auto loop_itr = upslog_iterator.find(songid), loop_itr != upslog_iterator.end(), loop_itr++){
+      _upslog.erase(loop_itr);
+      stepper++;
+      if (stepper > max_steps){ // Protect against long calls
+        break;
+      }
+    }
+  }//END if(upslog_iterator != .end)
+  
+  //if(){} If End Reached, continue, else exit function (to avoid time limit)
+  
+  
+  
+  
+  // --- Find the song in the _totals table, erase, verify --- \\
+  auto totals_iterator = _totals.require_find(songid, string("Song not found"));
+  _totals.erase(totals_iterator);   
+  check(_totals.find(songid) == _totals.end(), "There was a problem erasing the totals");
+  
 
-}
+  
+  // --- Forward call to remover --- \\
+  remove_song(songid);
+
+}//END deepremovesong()
