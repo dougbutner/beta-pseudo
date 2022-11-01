@@ -175,7 +175,7 @@ ACTION ups::deepremvsong(uint32_t songid) {
   // --- Find the song in the _upslog table, erase, verify --- \\ by_songid bysongid
   auto upslog_iterator = _upslog.get_index<"bysongid"_n>();
   uint8_t stepper = 0;
-  uint8_t max_steps = 33; //TODO make this a singleton to be able to update it
+  //del uint8_t max_steps = 33; //TODO make this a singleton to be able to update it OR just make this a const? which is worse
   if(upslog_iterator != _upslog.end()){// Records Exist
     for(auto loop_itr = upslog_iterator.find(songid), loop_itr != upslog_iterator.end(), loop_itr++){
       _upslog.erase(loop_itr);

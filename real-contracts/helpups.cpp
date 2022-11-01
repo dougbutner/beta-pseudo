@@ -7,7 +7,6 @@ We may need to remove all the updaters to move to a standard function.
 
 /*/
 
-
 /*/ -- In case you need an inline action -- \\
 action(
   permission_level{get_self(), name("active")}, // CHECK why active? Is this bad?
@@ -71,6 +70,10 @@ uint32_t iouid_to_tuid(uint32_t iouid){
   return tuid;
 }
 
+
+// --- Check authorization of an artist --- \\
+//void cxcheck_auth()
+
 //uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
 
 // === Pay + Mint NFTs === \\ 
@@ -85,19 +88,20 @@ void send_blux( const name&    from,
               )
 {
   
-  string blux_string = "BLUX"
+  string blux_string = "BLUX";
   symbol blux_symbol = eosio::symbol_code::symbol_code(blux_string);
   asset blux_asset = eosio::asset::asset( int64_t quantity, class symbol blux_symbol );
   
   send_blux(from, to, blux_asset, memo, songid);
 }//END unit-accepting overloaded send_blux()
-//CHECK set permission eosio.code on the BLUX contract
-void send_blux( const name&    from,
-                const name&    to,
-                const asset&   quantity, 
-                const string&  memo,
-                const uint32_t& songid)
-{
+
+  void send_blux( //CHECK set permission eosio.code on the BLUX contract
+      const name&    from,
+      const name&    to,
+      const asset&   quantity, 
+      const string&  memo,
+      const uint32_t& songid
+  ){
   // --- Check that this contract is the caller  --- \\
   require_auth(get_self());
   //require_recipient(to);
@@ -138,12 +142,7 @@ struct song {
 /*/
 
 // --- Add + Fix Songs in the Database --- \\ 
-void upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme){
-  
-  if(songid != 0){ // Update
-    
-  }
-  
+void upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme){  
   if(deleteme){ // Delete
     
     // --- Find the song in the _songs table --- \\
@@ -157,7 +156,6 @@ void upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, u
 
   }//END if(deleteme)
   else {
-    
     auto songs_iterator = _songs.find(songid);
     
     if( songs_iterator == _songs.end() )
@@ -236,7 +234,7 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\
 #include "upsifter.cpp"
   
-  // --- Update _totals record of cumulative song Ups --- \\
+  // --- Update / Insert _totals record of cumulative song Ups --- \\
   _totals(get_self(), songid);
   auto total_iterator = _totals.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
@@ -261,7 +259,7 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
     });
   }//END if(results _totals)
 
-  // --- Update _listeners record --- \\
+  // --- Update / Insert _listeners record --- \\
   _listeners(get_self(), songid);
   auto listener_iterator = _listeners.find(songid);
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
@@ -364,10 +362,6 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
     }
   }//END for(itr_artists)
   
-  // --- Verify the groupname is unique --- \\
-  if(payposition > 9998){ // Flag for OG registration of the group
-    //NOTE I don't think we need to do this anymore, as the TX will fail because it is primary key
-  }
   
   //TODO --- Allow for contract-initiated calls --- \\
   // Set authorized_caller, truthify has_authorized_caller
@@ -389,7 +383,6 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
   _groups(get_self(), get_self().value);
   auto groups_itr = _groups.find(groupname.value); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
-  //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
   if( groups_itr == _groups.end())
   { // -- Make New Record
     _groups.emplace(authorized_caller, [&]( auto& row ) {
@@ -417,9 +410,7 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
 // --- Will remove blacklisted user's ups retroactively --- \\
 void removeups(name user) {
   require_auth(get_self());
-  // --- Instantiate the ups + totals tables --- \\ 
-  
-  // --- 
+  // --- Instantiate the ups + totals tables --- \\
   
   
     // DELETE record from |ups| where (account == account )
@@ -500,7 +491,7 @@ void payupsender(name upsender){
     };
     
     // --- Check the next 12 entries for Groups --- \\
-    for ( auto itr_g_check = ious_itr.rbegin(); itr_g_check >= ious_itr.rbegin() - 12; itr_g_check++ ) {//CHECK should ious_itr really be the table?
+    for ( auto itr_g_check = ious_itr.rbegin(); itr_g_check >= ious_itr.rbegin() - 12; itr_g_check++ ) {//CHECK should ious_itr really be in the table?
       if (uint8_t ious_itr->artisttype == 2){
         groupies = true;
         // Pass Groupname, Artists, weights upcatcher to 
@@ -571,7 +562,7 @@ void payupsender(name upsender){
                 itr_g_paying_pos = 0; // Loop back to first recipient
               } 
               
-              if (remaining_ups > 0 && remaining_ups < 99999999999){              
+              if (remaining_ups > 0 && remaining_ups < 999999999999){              
                 // --- Determine Max + Real Pay by Weight --- \\ 
                 auto artist_paid = groups_itr->artists[artist_first_payable_pos];
                 auto real_payment = (remaining_ups >= groups_itr->weights[itr]) ? groups_itr->weights[itr] : remaining_ups;
@@ -581,7 +572,7 @@ void payupsender(name upsender){
                 remaining_ups -= real_payment;
               }
               
-              if(remaining_ups < 1 || remaining_ups > 99999999){ // It's the last payment
+              if(remaining_ups < 1 || remaining_ups > 999999999999){ // It's the last payment
                 // --- Update the table with new Payposition --- \\ 
                 
                 // --- Check for song in table --- \\ 
@@ -613,7 +604,6 @@ void payupsender(name upsender){
 
 
 // === Deleters + Cleaners === \\
-
 void remove_song(uint32_t songid){
   // --- Find the song in the _songs table --- \\
   auto songs_iterator = _songs.require_find(songid, string("Song not found"));
@@ -622,5 +612,5 @@ void remove_song(uint32_t songid){
   _songs.erase(songs_iterator);   
   
   // --- Verify the song was successfully deleted --- \\
-   check(_songs.find(songid == _songs.end(), "There was a problem deleting the song");
+   check(_songs.find(songid) == _songs.end(), "This song could not be deleted. You may try again.");
 }//END delete_song()

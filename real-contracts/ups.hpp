@@ -17,7 +17,7 @@ public:
 
 struct song {
   string title;
-  vector<double> geoloc; //CHECK this should accomidate changes, be optional of possible, but that would defeat the geo point
+  vector<double> geoloc; //CHECK this should accomadate changes, be optional of possible, but that would defeat the geo point
   uint8_t genre;
   uint8_t mood;
   uint8_t format;
@@ -112,7 +112,6 @@ private:
     uint8_t upstype;
     uint32_t initiated;
     uint32_t updated; 
-    
     uint64_t primary_key() const { return iouid; }
     uint64_t by_upcatcher() const { return upcatcher.value; }
     uint64_t by_artisttype() const { return (uint64_t) artisttype; }
@@ -120,7 +119,7 @@ private:
     uint64_t by_initiated() const { return (uint64_t) initiated; }
     uint64_t by_updated() const { return (uint64_t) updated; }
   };
-  
+
   using ious_table = multi_index<name("ious"), ious,
     eosio::indexed_by<"byupcatcher"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upcatcher>>,
     eosio::indexed_by<"byartisttype"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_artisttype>>,
