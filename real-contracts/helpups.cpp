@@ -227,8 +227,9 @@ void upsert_logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t so
   }//END if(results _upslog) 
 }
 
+
 // --- Upsert _listeners and _totals --- \\
-void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid) {
+void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t &songid, bool negative) {
   require_auth( upsender );
 
   // --- Sift Ups by Type (Requires upstype, Defines newxxxups)--- \\
@@ -250,13 +251,25 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
   } 
   else 
   { // -- Update Record
-    _totals.modify(total_iterator, upsender, [&]( auto& row ) {
-      row.key = songid;
-      row.totalsolups += newsolups;
-      row.totalbluups += newbluups;
-      row.totalbigups += newbigups;
-      row.updated = time_of_up;
-    });
+    if(!negative){
+      _totals.modify(total_iterator, upsender, [&]( auto& row ) {
+        row.key = songid;
+        row.totalsolups += newsolups;
+        row.totalbluups += newbluups;
+        row.totalbigups += newbigups;
+        row.updated = time_of_up;
+      });
+    } else { // Subtract the value from totals
+      _totals.modify(total_iterator, upsender, [&]( auto& row ) {
+        row.key = songid;
+        row.totalsolups -= newsolups;
+        row.totalbluups -= newbluups;
+        row.totalbigups -= newbigups;
+        row.updated = time_of_up;
+      });
+    }
+    
+    
   }//END if(results _totals)
 
   // --- Update / Insert _listeners record --- \\
@@ -412,9 +425,13 @@ void removeups(name user) {
   require_auth(get_self());
   // --- Instantiate the ups + totals tables --- \\
   
-  
+
     // DELETE record from |ups| where (account == account )
+    
+    
     // UPDATE record from |totals|
+    
+    // Call updateup
     // call updatetotal()
 } 
 
@@ -460,7 +477,7 @@ void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t son
     upsert_logup(upscount, upstype, upsender, songid, 0);
     
     // --- Calls action to update the TOTALS table -- \\
-    upsert_total(upscount, upstype, upsender, songid);
+    upsert_total(upscount, upstype, upsender, songid, negative);
   }
   
   if (upstype != BLUX){

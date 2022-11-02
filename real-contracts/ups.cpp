@@ -12,7 +12,7 @@ ACTION removesong(uint32_t songid)
 ACTION deepremvsong(uint32_t songid)
 /*/
 
-// --- Receive SOL sent to contract + make ups --- \\
+// --- Recieve SOL sent to contract + make ups --- \\
 //NOTE UPs memo is either an integer of the songid, or the songid with " BIG appended" or any other string
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
 {  
