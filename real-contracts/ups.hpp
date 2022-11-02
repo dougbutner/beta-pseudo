@@ -114,6 +114,7 @@ private:
     uint32_t updated; 
     uint64_t primary_key() const { return iouid; }
     uint64_t by_upcatcher() const { return upcatcher.value; }
+    uint64_t by_upsender() const { return upsender.value; }
     uint64_t by_artisttype() const { return (uint64_t) artisttype; }
     uint64_t by_upscount() const { return (uint64_t) upscount; }
     uint64_t by_initiated() const { return (uint64_t) initiated; }
@@ -122,9 +123,11 @@ private:
 
   using ious_table = multi_index<name("ious"), ious,
     eosio::indexed_by<"byupcatcher"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upcatcher>>,
+    eosio::indexed_by<"byupsender"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upsender>>,
     eosio::indexed_by<"byartisttype"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_artisttype>>,
     eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upscount>>,
-    eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>
+    eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>,
+    eosio::indexed_by<"byupdated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_updated>>
   >;
   
   // --- Keep record of Artists (recipient in _songs) to pay --- \\
