@@ -1,6 +1,7 @@
 # Douglas
 eosio-scripts.cpp
 contracts
+.DS_Store
 
 # Logs
 logs
