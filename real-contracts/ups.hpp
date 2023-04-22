@@ -1,6 +1,7 @@
 
 #include "eosio/eosio.hpp"
 #include <eosio/asset.hpp>
+#include "cxc.hpp"
 #include <vector> //CHECK is needed? 
 
 using namespace std;

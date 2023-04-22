@@ -250,7 +250,7 @@ void upsert_total(uint32_t &upscount, uint8_t upstype, name &upsender, uint32_t 
     });
   } 
   else 
-  { // -- Update Record
+  { // -- Update Record 
     if(!negative){
       _totals.modify(total_iterator, upsender, [&]( auto& row ) {
         row.key = songid;
@@ -325,7 +325,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   /*/
   
   // --- Add record to _upslog --- \\
-  _ious(get_self(), upsender); //WARN this should probably be a contract scope
+  _ious(get_self(), get_self().value); //CHECK this is the correct scope
   auto ious_itr = _ious.find(iouid); 
   uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   //TODO - May need to deal with the type of up, as it could be Big, and we update.. so...
@@ -421,17 +421,23 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
 // --- Update running log of ups --- \\
 
 // --- Will remove blacklisted user's ups retroactively --- \\
+/*/ Reality Check
+It's only feasible to update the totals and the IOUs table.
+Individually removing from upslog_ table requires parsing the concatenated values of the TUid and the UserID
+It will be possible to process and remove these later with an action that can be called from eosjs
+/*/
 void removeups(name user) {
   require_auth(get_self());
   // --- Instantiate the ups + totals tables --- \\
   
 
     // DELETE record from |ups| where (account == account )
+        // Call updateup  
+    
     
     
     // UPDATE record from |totals|
-    
-    // Call updateup
+  
     // call updatetotal()
 } 
 
@@ -444,9 +450,18 @@ ACTION ups::removeups(name user) {
 } /*/
 
 
+void removeiou(name sender, name receiver)
 
 // --- All IOUS are removed from table once paid --- \\
 ACTION ups::removeiou(name sender, name receiver) {
+  
+  auto todelete = 0;
+  
+  if (receiver.value = ){
+    
+    
+  }
+  
   // if (receiver = dummy_value && sender = dummy_value)
     // return (failed) 
   // if (receiver = dummy_value)
@@ -455,6 +470,15 @@ ACTION ups::removeiou(name sender, name receiver) {
   // DELETE all record from |ious| where reciever = reciever
   // else 
   // DELETE records from |ious| where reciever = reciever && sender = sender 
+  
+  //TODO add check authorization (if needed for internal call)
+  
+  // --- Get oldest IOUs from _ious Table --- \\
+  _ious(get_self(), sender.value);//CHECK WARN scope
+  auto ious_itr = _ious.get_index("byupcatcher"_n); //CHECK syntax tweets_table.get_index<"time"_n>()
+  
+  
+  
 }
 
 // --- Keep track of total account amounts for ALL users --- \\ CHANGE TO UPSERT
@@ -495,7 +519,7 @@ void payupsender(name upsender){
     
     // --- Get oldest IOUs from _ious Table --- \\
     _ious(get_self(), upsender.value);//CHECK WARN scope
-    auto ious_itr = _ious.get_index("initiated"_n)
+    auto ious_itr = _ious.get_index("byinitiated"_n)
     
     // --- Check if Groups exist in list to be paid --- \\ CHECK: Remove this from single-payer
     bool groupies = false;
