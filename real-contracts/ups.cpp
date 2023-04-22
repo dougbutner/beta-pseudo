@@ -33,7 +33,8 @@ ACTION deepremvsong(uint32_t songid)
   auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
-  uint32_t quantity = uint32_t(quantity);
+  //uint32_t quantity = uint32_t(quantity);
+  uint32_t quantity_uint = static_cast<uint32_t>(quantity.amount); 
   
   // --- Check if BIG --- \\
   //EXPLAIN - Passing a character at the end of the memo (instead of just songid) triggers BIG check (app does "2947 BIG")
@@ -45,7 +46,7 @@ ACTION deepremvsong(uint32_t songid)
   }
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity.amount, ups_type, upsender, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity_uint, 1, upsender, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->SOL ups 
 
@@ -70,10 +71,12 @@ ACTION deepremvsong(uint32_t songid)
   auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
-  uint32_t quantity = uint32_t(quantity);
+  //uint32_t quantity = uint32_t(quantity);
+  uint32_t quantity_uint = static_cast<uint32_t>(quantity.amount); //ChatGPT said this was better
+
 
   // --- Pass on to updateup() --- \\
-  updateup(quantity.amount, 2, from, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity_uint, 2, from, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->BLUX ups 
 
