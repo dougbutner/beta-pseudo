@@ -51,7 +51,7 @@ ACTION deepremvsong(uint32_t songid)
 
 
 // --- Receive BLUX sent to contract + make ups --- \\
-[[eosio::on_notify("bluxbluxblux::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
+[[eosio::on_notify("bluxbluxblux::transfer")]] void ups::blux_catch( const name from, const name to, const asset quantity, const string memo )
 {  
   // --- Check that we're the intended recipient --- \\ 
   if (to != _self) return; 
