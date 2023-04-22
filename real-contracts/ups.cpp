@@ -73,7 +73,7 @@ ACTION deepremvsong(uint32_t songid)
   uint32_t quantity = uint32_t(quantity);
 
   // --- Pass on to updateup() --- \\
-  updateup(quantity.amount, 2, upsender, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity.amount, 2, from, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->BLUX ups 
 
