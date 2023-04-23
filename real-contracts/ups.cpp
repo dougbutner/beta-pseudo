@@ -46,7 +46,7 @@ ACTION deepremvsong(uint32_t songid)
   }
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity_uint, 1, upsender, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity_uint, 1, from, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->SOL ups 
 
@@ -125,7 +125,7 @@ struct song {
   uint8_t genre;
   uint8_t mood;
   uint8_t format;
-  string atomictempid;
+  uint64_t atomictempid;
 };
 /*/
 
@@ -142,11 +142,13 @@ ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint
   // --- Validate Artist is signing --- \\
   
   //struct car c = {.year=1923, .make="Nash", .model="48 Sports Touring Car"};
+  //struct song s = {.title = title, .geoloc=geoloc, .genre=genre, .mood=mood, .format=format, .atomictempid=atomictempid};
+  song s{.title = title, .geoloc = geoloc, .genre = genre, .mood = mood, .format = format, .atomictempid = atomictempid};
   
-  struct song song = {.title = title; .geoloc=geoloc; .genre=genre; .mood=mood; .format=format; .atomictempid=atomictempid;};
+    
     // TODO if (group) CHECK (sender is in |artistgroups|)
     // TODO How are we allowing anyone to update? Tracking last updater? Checking the record of updates?
-  upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme);
+  upsert_song(s, artistacc, adderacc, artisttype, songid, false);
 }
 
 
