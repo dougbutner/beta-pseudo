@@ -33,7 +33,8 @@ ACTION deepremvsong(uint32_t songid)
   auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
-  uint32_t quantity = uint32_t(quantity);
+  //uint32_t quantity = uint32_t(quantity);
+  uint32_t quantity_uint = static_cast<uint32_t>(quantity.amount); 
   
   // --- Check if BIG --- \\
   //EXPLAIN - Passing a character at the end of the memo (instead of just songid) triggers BIG check (app does "2947 BIG")
@@ -45,13 +46,13 @@ ACTION deepremvsong(uint32_t songid)
   }
   
   // --- Pass on to updateup() --- \\
-  updateup(quantity.amount, ups_type, upsender, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity_uint, 1, from, songid_upped, 0); // 1=SOL Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->SOL ups 
 
 
 // --- Receive BLUX sent to contract + make ups --- \\
-[[eosio::on_notify("bluxbluxblux::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
+[[eosio::on_notify("bluxbluxblux::transfer")]] void ups::blux_catch( const name from, const name to, const asset quantity, const string memo )
 {  
   // --- Check that we're the intended recipient --- \\ 
   if (to != _self) return; 
@@ -70,10 +71,12 @@ ACTION deepremvsong(uint32_t songid)
   auto song_iter = _songs.require_find( songid_upped, string( "Song ID " + to_string(songid_upped) + " was not found." ) );
 
   // --- Set up Variables --- \\
-  uint32_t quantity = uint32_t(quantity);
+  //uint32_t quantity = uint32_t(quantity);
+  uint32_t quantity_uint = static_cast<uint32_t>(quantity.amount); //ChatGPT said this was better
+
 
   // --- Pass on to updateup() --- \\
-  updateup(quantity.amount, 2, upsender, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
+  updateup(quantity_uint, 2, from, songid_upped, 0); // 2=BLUX Ups (uint32_t quantity, uint8_t upstype, uint32_t songid, name upsender)
   
 }//END listen->BLUX ups 
 
@@ -122,7 +125,7 @@ struct song {
   uint8_t genre;
   uint8_t mood;
   uint8_t format;
-  string atomictempid;
+  uint64_t atomictempid;
 };
 /*/
 
@@ -139,11 +142,13 @@ ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint
   // --- Validate Artist is signing --- \\
   
   //struct car c = {.year=1923, .make="Nash", .model="48 Sports Touring Car"};
+  //struct song s = {.title = title, .geoloc=geoloc, .genre=genre, .mood=mood, .format=format, .atomictempid=atomictempid};
+  song s{.title = title, .geoloc = geoloc, .genre = genre, .mood = mood, .format = format, .atomictempid = atomictempid};
   
-  struct song song = {.title = title; .geoloc=geoloc; .genre=genre; .mood=mood; .format=format; .atomictempid=atomictempid;};
+    
     // TODO if (group) CHECK (sender is in |artistgroups|)
     // TODO How are we allowing anyone to update? Tracking last updater? Checking the record of updates?
-  upsert_song(song song, name artistacc, name adderacc, uint8_t artisttype, uint32_t songid, bool deleteme);
+  upsert_song(s, artistacc, adderacc, artisttype, songid, false);
 }
 
 

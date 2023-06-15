@@ -79,6 +79,12 @@ We have had to make some changes for performance. Here's how it will work now.
 - BLUX will be included in default top charts, and Blu Ups considered in reward algorithm, with limits
 - Users will be able to trade Soldisk NFTs, but only register one at a time themselves
 
+## Updates
+
+This algorithm has been re-engineered to use tables as the mechanism of data storage instead of using NFTs in the process. 
+
+Rewriting the contracts in [beta-light](https://github.com/dougbutner/beta-light) repo.
+
 # [Learn more about cXc](https://linktr.ee/cxc.world)
 
 > P.S. We're also working on our [geotribal system](https://github.com/dougbutner/web-4#geosocial-systems-geotribes--geodomains) contracts tribe.cxc, council.cxc, geo.cxc, stay tuned! 
