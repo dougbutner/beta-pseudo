@@ -642,16 +642,3 @@ void payupsender(name upsender){
    }//END for (12 IOUs)
 }//END final payupsender()
 
-
-
-// === Deleters + Cleaners === \\
-void remove_song(uint32_t songid){
-  // --- Find the song in the _songs table --- \\
-  auto songs_iterator = _songs.require_find(songid, string("Song not found"));
-  
-  // --- Erase Song --- \\ 
-  _songs.erase(songs_iterator);   
-  
-  // --- Verify the song was successfully deleted --- \\
-   check(_songs.find(songid) == _songs.end(), "This song could not be deleted. You may try again.");
-}//END delete_song()
