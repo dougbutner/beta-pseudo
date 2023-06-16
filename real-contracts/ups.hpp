@@ -21,7 +21,9 @@ public:
     };
 
     uint32_t timeunit;
-    std::string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" };
+    string AUTH_ACCOUNTS[6] = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" };
+    # vector<string> AUTH_ACCOUNTS = { "currentxchng", "cxc", "cron.cxc", "pay.cxc", "ups.cxc", "helpups.cxc" };
+
     enum up_type {
         SOL = 1,
         BLUX = 2,
@@ -30,45 +32,45 @@ public:
     };
 
 private:
-    TABLE upslog {
-        uint upid;
-        uint32_t songid;
-        uint32_t totalsolups;
-        uint32_t totalbluups;
-        uint32_t totalbigups;
-        uint32_t tuid;
-        uint64_t primary_key() const { return upid; }
-        uint64_t by_songid() const { return (uint64_t) songid; }
-        uint64_t by_solups() const { return (uint64_t) totalsolups; }
-        uint64_t by_bluups() const { return (uint64_t) totalbluups; }
-        uint64_t by_bigups() const { return (uint64_t) totalbigups; }
-        uint64_t by_tuid() const { return (uint64_t) tuid; }
-    };
+TABLE upslog {
+    uint upid;
+    uint32_t songid;
+    uint32_t totalsolups;
+    uint32_t totalbluups;
+    uint32_t totalbigups;
+    uint32_t tuid;
+    uint64_t primary_key() const { return upid; }
+    uint64_t by_songid() const { return (uint64_t) songid; }
+    uint64_t by_solups() const { return (uint64_t) totalsolups; }
+    uint64_t by_bluups() const { return (uint64_t) totalbluups; }
+    uint64_t by_bigups() const { return (uint64_t) totalbigups; }
+    uint64_t by_tuid() const { return (uint64_t) tuid; }
+};
 
-    using upslog_table = multi_index<name("upslog"), upslog,
-        eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_songid>>,
-        eosio::indexed_by<"bysolups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_solups>>,
-        eosio::indexed_by<"bybluups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_bluups>>,
-        eosio::indexed_by<"bybigups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_bigups>>,
-        eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
-    >;
+using upslog_table = multi_index<name("upslog"), upslog,
+    eosio::indexed_by<"bysongid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_songid>>,
+    eosio::indexed_by<"bysolups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_solups>>,
+    eosio::indexed_by<"bybluups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_bluups>>,
+    eosio::indexed_by<"bybigups"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_bigups>>,
+    eosio::indexed_by<"bytuid"_n, eosio::const_mem_fun<upslog, uint64_t, &upslog::by_tuid>>
+>;
 
-    TABLE totals {
-        uint32_t songid;
-        uint32_t totalsolups;
-        uint32_t totalbluups;
-        uint32_t totalbigups;
-        uint32_t updated;
-        uint64_t primary_key() const { return songid; }
-    };
+TABLE totals {
+    uint32_t songid;
+    uint32_t totalsolups;
+    uint32_t totalbluups;
+    uint32_t totalbigups;
+    uint32_t updated;
+    uint64_t primary_key() const { return songid; }
+};
 
-    using totals_table = multi_index<name("totals"), totals>;
-    
-    TABLE songs {
+using totals_table = multi_index<name("totals"), totals>;
+
+TABLE songs {
     uint32_t songid;
     name artistacc;
     uint8_t artisttype;
-    song song;
+    song songo;
     uint64_t primary_key() const { return (uint64_t) songid; }
 };
 
@@ -148,9 +150,8 @@ void removeups(name user);
 void removeiou(name sender, name receiver);
 void updatelisten(uint32_t upscount, uint8_t upstype, name upsender);
 void removelisten(name upsender);
-void removesong(uint32_t songid);
-void deepremvsong(uint32_t songid);
-void updateartist(name artist_wax, vector<string> artistinfo, string artistalias);
+
+
 
 public:
 [[eosio::on_notify("sol.cxc::transfer")]]
@@ -158,8 +159,10 @@ void sol_catch(const name from, const name to, const asset quantity, const std::
 
 ACTION payup(void);
 ACTION payup(name upsender);
-ACTION updateartist(name upsender, vector<string> artistinfo, string artistalias);
+ACTION updateartist(name artistwax, vector<string> artistinfo, string artistalias);
 ACTION updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo);
 ACTION updatesong(uint32_t songid, song dasong);
+ACTION removesong(uint32_t songid);
+ACTION deepremvsong(uint32_t songid);
 
 };
