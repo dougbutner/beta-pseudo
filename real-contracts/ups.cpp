@@ -93,8 +93,9 @@ ACTION ups::payup(name upsender) {
 
 // --- Register artist, or change artist information --- //
 ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artistalias) {
+  auto itr = _artists.find(artistacc.value);
   // IF (exists |artists => account|)
-  
+ 
   // Check if authorized to update
   // --- DISPATCH to upsert_artist function 
   // UPDATE |artists => artistinfo|
@@ -107,7 +108,18 @@ ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artis
 
 // --- Register artist group, or change group information --- //
 ACTION ups::updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo) {
-  //TODO Move AUTH check from internal upsert_groups function to here
+    // Check if at least one artist in the group is authorized
+  bool authorized = false;
+  
+  for (auto const& artist : artists) {
+    name artist_name(artist);
+    if (has_auth(artist_name)) {
+      authorized = true;
+      break;
+    }
+  }
+  
+  check(authorized, "At least one artist from the group must authorize the update");
   
   // --- Call the upsert helper function with payposition flag 9999 --- //
   upsert_groups(intgroupname, group_alias, artists, weights, groupinfo, 9999);
@@ -152,17 +164,15 @@ ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint
 }
 
 
+
+
 // --- Remove the song from current earners  --- //
 ACTION ups::removesong(uint32_t songid) {
  // --- Only We, Artist, and Uploader can remove the song --- //
- bool authorized = false;
- if (has_auth(adderacc) || has_auth(artistacc) || has_auth("cxc"_n) || has_auth(eosio.code){
-   authorized = true;
- }
- 
- check(authorized, "Only artist and uploader can update the song on contract.");
- 
- remove_song(songid);
+  auto song_itr = _songs.require_find(songid, "Song does not exist. Good job, Ninja person.");
+  check(has_auth(song_itr->adderacc) || has_auth(song_itr->artistacc) || has_auth("cxc"_n) || has_auth(_self), "Unauthorized: Only the uploader, artist, cxc, or the contract itself can remove this song");
+   _songs.erase(song_itr);
+    check(_songs.find(songid) == _upslog.end(), "There was a problem erasing the records from the upslog table.");
 }//END removesong()
 
 // --- Remove all record of song in RAM --- //
