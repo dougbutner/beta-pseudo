@@ -93,17 +93,24 @@ ACTION ups::payup(name upsender) {
 
 // --- Register artist, or change artist information --- //
 ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artistalias) {
-  auto itr = _artists.find(artistacc.value);
-  // IF (exists |artists => account|)
- 
-  // Check if authorized to update
-  // --- DISPATCH to upsert_artist function 
-  // UPDATE |artists => artistinfo|
-  
-  
-  // Check if there is a change to 
-  // else 
-  // INSERT record into |artists| return;
+  auto artist_itr = _artists.find(artistacc.value);
+  if (artist_itr == _artists.end()) { 
+    // If artist does not exist, insert a new record
+    _artists.emplace(get_self(), [&](auto& row){
+      row.artistacc = artistacc;
+      row.artistalias = artistalias;
+      row.artistinfo = artistinfo;
+    });
+  } else {
+    // Check if caller has authority
+    check(has_auth(artistacc), "Only the artist can update their information");
+    // If artist already exists, update the record
+    _artists.modify(artist_itr, get_self(), [&](auto& row){
+      row.artistalias = artistalias;
+      row.artistinfo = artistinfo;
+    });    
+  }
+
 }
 
 // --- Register artist group, or change group information --- //
