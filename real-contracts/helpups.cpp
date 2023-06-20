@@ -34,12 +34,13 @@ multi_index_example( name receiver, name code, datastream<const char*> ds )
 ACTION updateup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
 ACTION logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
 ACTION removeups(name user); 
-ACTION updatetotal(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender); 
 ACTION updateiou(name sender, name receiver, uint32_t amount, uint32_t songid, bool subtract); 
 ACTION removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
 ACTION updatelisten(uint32_t upscount, uint8_t upstype, uint8_t method_sent, name upsender);
 ACTION removelisten(name upsender);
 ACTION removesong(uint32_t songid); //TODO add to pseudo-code, removes all IOUs for song, song
+
+upsert_total(upscount, upstype, upsender, songid, negative);
 /*/
 
 // === Helper functions === //
@@ -320,7 +321,7 @@ void upsert_ious(uint32_t upscount, uint8_t upstype, name &upsender, uint32_t so
   
   /*/ --- iouid explanation --- //
     Where does the iouid come from?? 
-    iouid is a bit-combo of Songid and Tuid 
+    iouid is a bit-smash of Songid and Tuid 
     uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) songid;
   /*/
   
@@ -412,33 +413,26 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
 // --- Update running log of ups --- //
 
 // --- Will remove blacklisted user's ups retroactively --- //
-/*/ Reality Check
+/*/
+Only the contract may remove ups. This is because of the financial aspect of the 
+
+Reality Check
 It's only feasible to update the totals and the IOUs table.
 Individually removing from upslog_ table requires parsing the concatenated values of the TUid and the UserID
 It will be possible to process and remove these later with an action that can be called from eosjs
 /*/
 void removeups(name user) {
-  require_auth(get_self());
+  require_auth(get_self()); //CHECK do we need to call this with the eosio.code permission?
   // --- Instantiate the ups + totals tables --- //
   
 
     // DELETE record from |ups| where (account == account )
         // Call updateup  
     
-    
-    
     // UPDATE record from |totals|
   
-    // call updatetotal()
+    // call upsert_total(upscount, upstype, upsender, songid, negative);
 } 
-
-/*/ OLD VERSION OF ABOVE --- Will remove blacklisted user's ups retroactively --- //
-ACTION ups::removeups(name user) {
-  // IF caller == account
-    // DELETE record from |ups| where (account == account )
-    // UPDATE record from |totals|
-    // call updatetotal()
-} /*/
 
 
 void removeiou(name sender, name receiver)
@@ -453,9 +447,6 @@ ACTION ups::removeiou(name sender, name receiver) {
     
   }
   
-  // if (receiver = dummy_value && sender = dummy_value)
-    // return (failed) 
-  // if (receiver = dummy_value)
   // DELETE all records from |ious| where sender = sender
   // else if (sender = dummy_value)
   // DELETE all record from |ious| where reciever = reciever
@@ -466,7 +457,7 @@ ACTION ups::removeiou(name sender, name receiver) {
   
   // --- Get oldest IOUs from _ious Table --- //
   _ious(get_self(), sender.value);//CHECK WARN scope
-  auto ious_itr = _ious.get_index("byupcatcher"_n); //CHECK syntax tweets_table.get_index<"time"_n>()
+  auto ious_itr = _ious.get_index<"byupcatcher"_n>(); 
   
   
   
@@ -485,7 +476,8 @@ ACTION ups::removelisten(name upsender) {
 }
 
 
-// --- DIPATCHER Checks + calls logup() updateiou() and updatetotal() --- //
+// --- DISPATCHER Checks + calls logup() updateiou() and upsert_total() --- //
+//CHECK currently the negative isn't doing anything
 void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t songid, bool negative) {  
   if (!negative){
     // --- Log the ups in UPSLOG table --- // 
@@ -504,9 +496,7 @@ void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t son
 // --- Sends BLUX, clears IOUS. Called from overloaded payup() --- //
 void payupsender(name upsender){
      // --- Min Wait 5 seconds since last full pay payment --- //
-    uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
     _internallog(get_self(), get_self().value);
-    check(_internallog.get().primary_key() < (time_of_up + 4), "Please wait 5 seconds between each payup. ");
     
     // --- Get oldest IOUs from _ious Table --- //
     _ious(get_self(), upsender.value);//CHECK WARN scope
@@ -605,8 +595,6 @@ void payupsender(name upsender){
               }
               
               if(remaining_ups < 1 || remaining_ups > 999999999999){ // It's the last payment
-                // --- Update the table with new Payposition --- // 
-                
                 // --- Check for song in table --- // 
                 auto groups_iter = _groups.require_find( ious_itr->intgroupname, string( "Group " + to_string(ious_itr->intgroupname) + " was not found when we tried to pay." ) );
                 

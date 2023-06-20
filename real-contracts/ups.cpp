@@ -3,15 +3,6 @@
 
 //WARN updateartist updategroup updatesong may have incorrect parameters
 
-/*/ TODO
-ACTION payup(name upsender); // User's call to pay themselves
-ACTION updateartist(name artistacc, vector<string> artistinfo, string artistalias);
-ACTION updategroup(name intgroupname, string group_alias, vector<string> artists, vector<int8_t> weights, vector<string> groupinfo);
-ACTION updatesong(uint32_t songid, vector<string>);
-ACTION removesong(uint32_t songid)
-ACTION deepremvsong(uint32_t songid)
-/*/
-
 // --- Recieve SOL sent to contract + make ups --- //
 //NOTE UPs memo is either an integer of the songid, or the songid with " BIG appended" or any other string
 [[eosio::on_notify("sol.cxc::transfer")]] void ups::sol_catch( const name from, const name to, const asset quantity, const string memo )
@@ -83,6 +74,8 @@ ACTION deepremvsong(uint32_t songid)
 
 // --- Send all owed payments listed in |ious| ROUTES to payupsender --- //
 ACTION ups::payup(void) {
+  check(_internallog.get().primary_key() < (time_of_up + 4), "Someone just called the action, try again in a few seconds.");
+
   payupsender("cxc"_n); // Dummy value for dispatcher
 }//END payup(void)
 
@@ -103,7 +96,7 @@ ACTION ups::updateartist(name artistacc, vector<string> artistinfo, string artis
     });
   } else {
     // Check if caller has authority
-    check(has_auth(artistacc), "Only the artist can update their information");
+    check(has_auth(artistacc), "Only the artists account can update their information");
     // If artist already exists, update the record
     _artists.modify(artist_itr, get_self(), [&](auto& row){
       row.artistalias = artistalias;
@@ -169,9 +162,6 @@ ACTION ups::updatesong( string title, vector<double> geoloc, uint8_t genre, uint
     // TODO How are we allowing anyone to update? Tracking last updater? Checking the record of updates?
   upsert_song(s, artistacc, adderacc, artisttype, songid, false);
 }
-
-
-
 
 // --- Remove the song from current earners  --- //
 ACTION ups::removesong(uint32_t songid) {
