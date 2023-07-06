@@ -41,7 +41,7 @@ enum up_type { //CHECK is this really just making vars across the system (needed
 
 private:  
   TABLE upslog { 
-    uint upid; //CHECK CHANGED Now is a TU + _n as a combined string OR we could serialize 
+    uint64_t upid; 
     uint32_t songid;
     uint32_t totalsolups; 
     uint32_t totalbluups;
@@ -167,7 +167,6 @@ private:
   
   void updateup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); //DISPATCHER
   void logup(uint32_t upscount, uint8_t upstype, name upsender, uint32_t songid); 
-  void removeups(name user); 
   void removeiou(name sender, name receiver); // Receiver or sender can be set to dummy value to delete all for a user
   void updatelisten(uint32_t upscount, uint8_t upstype, name upsender);
   void removelisten(name upsender);
