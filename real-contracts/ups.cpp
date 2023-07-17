@@ -72,7 +72,8 @@
 }//END listen->BLUX ups 
 
 
-// --- Send all owed payments listed in |ious| ROUTES to payupsender --- //
+// --- Send Owed payments listed in |ious| ROUTES to payupsender --- //
+
 ACTION ups::payup(void) {
   check(_internallog.get().primary_key() < (time_of_up + 4), "Someone just called the action, try again in a few seconds.");
 

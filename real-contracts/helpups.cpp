@@ -415,23 +415,30 @@ void upsert_groups(string &groupname, name &intgroupname, vector<name> artists, 
 
 
 // --- All IOUS are removed from table once paid --- //
-ACTION ups::removeiou(name sender, name receiver) {
+void removeiou(name sender, name receiver, uint32_t removeamount) {
   
-  auto todelete = 0;
-  
-  if (receiver.value = ){
-    
-    
+  if (receiver.value = sender.value){
+    // Return an error that the Sender and receiver values cannot be the same 
   }
   
-  // DELETE all records from |ious| where sender = sender
-  // else if (sender = dummy_value)
-  // DELETE all record from |ious| where reciever = reciever
-  // else 
   // DELETE records from |ious| where reciever = reciever && sender = sender 
-  
-  //TODO add check authorization (if needed for internal call)
-  
+  // removeamount tells how many records to remove from the table
+  // when removing a record, we must deduct the amount of ups from removeamount 
+  // Must keep track of the amount of ups removed with removeamount
+  // If the amount of ups in the row is greater than removeamount, then we must update the record instead of remove it
+
+  // Make the row remove a maximum of 12 rows at a time
+
+  require_auth(get_self());
+
+  // Check if sender and receiver values are the same
+  check(sender != receiver, "Sender and receiver values cannot be the same");
+
+  // Instantiate the ious table
+  ious_table ious(get_self(), get_self().value);
+
+
+
   // --- Get oldest IOUs from _ious Table --- //
   _ious(get_self(), sender.value);//CHECK WARN scope
   auto ious_itr = _ious.get_index<"byupcatcher"_n>(); 
@@ -480,7 +487,7 @@ void updateup(uint32_t &upscount, uint8_t &upstype, name &upsender, uint32_t son
     upsert_logup(upscount, upstype, upsender, songid, 0);
     
     // --- Calls action to update the TOTALS table -- //
-    upsert_total(upscount, upstype, upsender, songid, negative);
+    upsert_total(upscount, upstype, upsender, songid, 0);
   }
   
   if (upstype != BLUX){
