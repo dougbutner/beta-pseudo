@@ -77,7 +77,7 @@ private:
   using totals_table = multi_index<name("totals"), totals>;
   
   // --- Connects cXc.world's DB to chain with songid, maintains NFT list for other dapps --- //
-  TABLE songs { //CHECK need to store the type of account here?
+  TABLE songs { 
     uint32_t songid;
     name artistacc;
     uint8_t artisttype;

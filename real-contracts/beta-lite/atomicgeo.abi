@@ -1,0 +1,86 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "gettopnfts",
+            "base": "",
+            "fields": [
+                {
+                    "name": "iso_country",
+                    "type": "string"
+                },
+                {
+                    "name": "limit",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "nft_registration",
+            "base": "",
+            "fields": [
+                {
+                    "name": "atomicassets_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "geo_location",
+                    "type": "float64"
+                },
+                {
+                    "name": "bluups",
+                    "type": "uint64"
+                },
+                {
+                    "name": "iso_country",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "registernft",
+            "base": "",
+            "fields": [
+                {
+                    "name": "atomicassets_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "geo_location",
+                    "type": "float64"
+                },
+                {
+                    "name": "iso_country",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "gettopnfts",
+            "type": "gettopnfts",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "registernft",
+            "type": "registernft",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "nfts",
+            "type": "nft_registration",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}
