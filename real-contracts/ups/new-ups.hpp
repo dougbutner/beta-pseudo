@@ -22,7 +22,6 @@ struct nft {
 };
 
 
-// A
 
 
 private:  
@@ -99,7 +98,6 @@ private:
   using ious_table = multi_index<name("ious"), ious,
     eosio::indexed_by<"byupcatcher"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upcatcher>>,
     eosio::indexed_by<"byupsender"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upsender>>,
-
     eosio::indexed_by<"byupscount"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_upscount>>,
     eosio::indexed_by<"byinitiated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_initiated>>,
     eosio::indexed_by<"byupdated"_n, eosio::const_mem_fun<ious, uint64_t, &ious::by_updated>>
@@ -117,7 +115,14 @@ private:
   };
   
   using cxclog_table = multi_index<name("internallog"), internallog>;
-  
+
+  TABLE config {
+      name token_contract = name("moneda.puma");
+      symbol token_symbol = symbol(symbol_code("PUMA"), 8);
+      uint32_t timeunit = 300;
+      uint32_t tupay = 1000;
+  };
+
   
   void updateup(uint32_t upscount, uint8_t upstype, name upsender, uint64_t nftid); //DISPATCHER
   void logup(uint32_t upscount, uint8_t upstype, name upsender, uint64_t nftid); 
@@ -136,6 +141,9 @@ private:
   uppers_table _uppers;
   totals_table _totals;
   cxclog_table _internallog;
+
+  // --- Declare Config Singleton --- //
+  typedef singleton<name("config"), config> config_t;
   
 public:
   
