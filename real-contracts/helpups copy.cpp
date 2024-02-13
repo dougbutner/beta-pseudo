@@ -77,7 +77,7 @@ uint32_t iouid_to_tuid(uint32_t iouid){
 //uint64_t iouid = (uint32_t) momentu << 32 | (uint32_t) content_id;
 
 // === Pay + Mint NFTs === //
-// --- Pay BLUX to the SOL recipients --- //
+
 
 // --- Overload to accept Integer types --- //
 void send_blux( const name&    from,
@@ -261,11 +261,10 @@ void upsert_total(uint32_t &upscount, name &upsender, uint32_t &content_id, bool
   // --- Update / Insert _uppers record --- //
   _uppers(get_self(), content_id);
   auto listener_iterator = _uppers.find(content_id);
-  uint32_t time_of_up = eosio::time_point_sec::sec_since_epoch();
   if( listener_iterator == _uppers.end() )
   {
     _uppers.emplace(upsender, [&]( auto& row ) {
-      row.key = upsender;
+      row.upsender = upsender;
       row.firstup = time_of_up;
       row.lastup = time_of_up;
       row.totalups = newups;
@@ -274,12 +273,8 @@ void upsert_total(uint32_t &upscount, name &upsender, uint32_t &content_id, bool
   else 
   {
     _uppers.modify(listener_iterator, upsender, [&]( auto& row ) {
-      row.key = upsender;
-      row.firstup = upstype;
-      row.lastup = time_of_up;
-      row.totalsolups += newsolups;
-      row.totalbluups += newbluups;
-      row.totalbigups += newbigups;
+      row.lastup = eosio::time_point_sec::sec_since_epoch();
+      row.totalups += newups;
     });
   }//END if(results _uppers)
 }//END upsert_total()
